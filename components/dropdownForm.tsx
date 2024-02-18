@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  useAnimatedReaction,
 } from "react-native-reanimated";
 import React, { useCallback, useEffect, useImperativeHandle } from "react";
 
@@ -16,6 +17,8 @@ const MAX_TRANSLATE_Y = SCREENHEIGHT - 50;
 
 type BottomeSheetProps = {
   children?: React.ReactNode;
+  onToggle?: () => void;
+  activateFormTouch?: boolean;
 };
 export type BottomSheetRefProps = {
   scrollTo: (destination: number) => void;
@@ -23,7 +26,7 @@ export type BottomSheetRefProps = {
 };
 
 const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
-  ({ children }, ref) => {
+  ({ children, onToggle, activateFormTouch }, ref) => {
     const translateY = useSharedValue(SCREENHEIGHT);
     const active = useSharedValue(false);
 
@@ -32,9 +35,8 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
 
       //CHANGE TO SCREEN HEIGHT
       active.value = Math.abs(destination) > 0;
-      console.log(destination + " " + active.value);
 
-      translateY.value = withSpring(destination, { damping: 50 });
+      translateY.value = withSpring(destination, { damping: 500 });
     }, []);
 
     const isActive = useCallback(() => {
@@ -52,17 +54,16 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
         context.value = { y: translateY.value };
       })
       .onUpdate((event) => {
-        console.log(event.translationY);
-
         translateY.value = event.translationY + context.value.y;
         translateY.value = Math.min(translateY.value, MAX_TRANSLATE_Y);
       })
       .onEnd(() => {
         if (translateY.value > SCREENHEIGHT * 0.8) {
-          console.log("fired");
           scrollTo(SCREENHEIGHT - 50);
-        } else if (translateY.value < SCREENHEIGHT * 0.6) {
+        } else {
           scrollTo(0);
+          //cRASHING THE APP
+          () => onToggle();
         }
       });
 
@@ -79,13 +80,16 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
       };
     });
 
-    return (
+    return activateFormTouch ? (
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.bottomSheetContainer, rBottomSheetStyle]}>
-          <View style={[styles.line]}></View>
-          {children}
+          <View>
+            <View style={styles.line}>{children}</View>
+          </View>
         </Animated.View>
       </GestureDetector>
+    ) : (
+      <View></View>
     );
   }
 );

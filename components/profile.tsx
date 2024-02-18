@@ -76,6 +76,8 @@ const styles = StyleSheet.create({
     zIndex: 3,
     borderRadius: 35,
     width: "100%",
+
+    height: 396,
     backgroundColor: "#6aafdf",
     alignItems: "center",
     justifyContent: "flex-start",

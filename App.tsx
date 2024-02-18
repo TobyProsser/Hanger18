@@ -11,8 +11,10 @@ import Profile from "./components/profile";
 import LeaderboardList from "./components/leaderboardList";
 import DropdownForm, { BottomSheetRefProps } from "./components/dropdownForm";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import DropdownContent from "./components/dropdownContent";
+
+import Animated, { useSharedValue } from "react-native-reanimated";
 
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 const logo =
@@ -21,14 +23,28 @@ const logo =
 export default function App() {
   const ref = useRef<BottomSheetRefProps>(null);
 
+  const [activateFormTouch, setActivateFormTouch] = useState(false);
+  const toggleActivateFormTouch = useCallback(() => {
+    "worklet";
+
+    setActivateFormTouch((prevActivateFormTouch) => !prevActivateFormTouch);
+  }, []);
+
+  var isActive;
   const onPress = useCallback(() => {
-    const isActive = ref?.current?.isActive();
+    isActive = ref?.current?.isActive();
     if (isActive) {
       ref?.current?.scrollTo(0);
+      setActivateFormTouch(false);
     } else {
       ref?.current?.scrollTo(SCREENHEIGHT * 0.65);
+      setActivateFormTouch(true);
     }
   }, []);
+
+  useEffect(() => {
+    console.log("ActiveTouch: " + activateFormTouch);
+  }, [activateFormTouch]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -49,11 +65,14 @@ export default function App() {
           }}
         >
           <Profile onPress={onPress} />
-          <DropdownForm ref={ref}>
-            <View style={{ flex: 1, backgroundColor: "blue" }}></View>
+          <LeaderboardList />
+          <DropdownForm
+            ref={ref}
+            onToggle={() => toggleActivateFormTouch}
+            activateFormTouch={activateFormTouch}
+          >
             <DropdownContent />
           </DropdownForm>
-          <LeaderboardList />
         </View>
 
         <StatusBar style="auto" />
