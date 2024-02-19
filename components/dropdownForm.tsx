@@ -1,4 +1,4 @@
-import { Dimensions, View, StyleSheet } from "react-native";
+import { Dimensions, View, StyleSheet, Text } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolate,
@@ -10,6 +10,8 @@ import Animated, {
   useAnimatedReaction,
 } from "react-native-reanimated";
 import React, { useCallback, useEffect, useImperativeHandle } from "react";
+
+import DropdownContent from "./dropdownContent";
 
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 
@@ -71,7 +73,7 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
       const borderRadius = interpolate(
         translateY.value,
         [MAX_TRANSLATE_Y - 50, MAX_TRANSLATE_Y],
-        [25, 5],
+        [25, 20],
         Extrapolate.CLAMP
       );
       return {
@@ -83,8 +85,15 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
     return activateFormTouch ? (
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.bottomSheetContainer, rBottomSheetStyle]}>
-          <View>
-            <View style={styles.line}>{children}</View>
+          <View style={{ flex: 1, borderRadius: 35 }}>
+            <View
+              style={{
+                flex: 1,
+              }}
+            >
+              {children}
+            </View>
+            <View style={styles.line}></View>
           </View>
         </Animated.View>
       </GestureDetector>
@@ -111,7 +120,7 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: "grey",
     alignSelf: "center",
-    marginVertical: SCREENHEIGHT - 15,
     borderRadius: 2,
+    bottom: 15,
   },
 });

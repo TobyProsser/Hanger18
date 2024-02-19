@@ -5,8 +5,8 @@ export default ColorSelect = () => {
   return (
     <View
       style={{
-        width: 75,
-        height: 75,
+        width: 100,
+        height: 50,
         borderRadius: 25,
         backgroundColor: "#2a3641",
         alignItems: "center",
@@ -15,8 +15,8 @@ export default ColorSelect = () => {
     >
       <View
         style={{
-          width: 55,
-          height: 55,
+          width: 80,
+          height: 30,
           borderRadius: 25,
           backgroundColor: "#282424",
           alignItems: "center",
@@ -25,8 +25,8 @@ export default ColorSelect = () => {
       >
         <View
           style={{
-            width: 50,
-            height: 50,
+            width: 75,
+            height: 25,
             borderRadius: 25,
             backgroundColor: "#F81C1C",
           }}
