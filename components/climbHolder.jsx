@@ -22,14 +22,6 @@ export default ClimbHolder = () => {
         >
           <View style={styles.rowSmall}>
             <Text style={styles.nameText}>Grade:</Text>
-            <View
-              style={{
-                width: 100,
-                height: 50,
-                backgroundColor: "red",
-                borderRadius: 25,
-              }}
-            ></View>
           </View>
           <View style={styles.rowSmall}>
             <Text style={styles.nameText}>Color:</Text>

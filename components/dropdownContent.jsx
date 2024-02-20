@@ -19,7 +19,7 @@ const CLIMB_HOLDER_HIEGHT = 375;
 const CLIMB_HOLDER_WIDTH =
   Platform.OS === "ios" ? SCREENWIDTH * 0.72 : SCREENWIDTH * 0.74;
 const SPACING = 10;
-const SPACER_ITEM_SIZE = (SCREENWIDTH - CLIMB_HOLDER_WIDTH) * 0.25;
+const SPACER_ITEM_SIZE = (SCREENWIDTH - CLIMB_HOLDER_WIDTH) * 0.5;
 const leftKey = "left_spacer";
 export default DropdownContenet = () => {
   const [climbs, setClimbs] = useState(
@@ -32,10 +32,15 @@ export default DropdownContenet = () => {
       cardWidth: CLIMB_HOLDER_WIDTH,
     }))
   );
+  console.log(CLIMB_HOLDER_WIDTH);
 
   React.useEffect(() => {
     if (climbs[0].key !== leftKey) {
-      setClimbs([{ key: leftKey }, ...climbs, { key: "right-spacer" }]);
+      setClimbs([
+        { key: leftKey, cardWidth: SPACER_ITEM_SIZE },
+        ...climbs,
+        { key: "right-spacer", cardWidth: SPACER_ITEM_SIZE },
+      ]);
     }
   }, [climbs]);
   const scrollX = React.useRef(new Animated.Value(0)).current;
@@ -44,6 +49,7 @@ export default DropdownContenet = () => {
       style={{
         top: SCREENHEIGHT - CLIMB_HOLDER_HIEGHT * 1.5,
         flex: 1,
+        alignSelf: "center",
       }}
     >
       <Animated.FlatList
@@ -54,7 +60,7 @@ export default DropdownContenet = () => {
         contentContainerStyle={{
           alignItems: "center",
         }}
-        snapToInterval={CLIMB_HOLDER_WIDTH + SPACING * 2}
+        snapToInterval={CLIMB_HOLDER_WIDTH * 1.5}
         decelerationRate={Platform.OS === "ios" ? 0 : 0.98}
         renderToHardwareTextureAndroid
         bounces={false}
@@ -101,7 +107,7 @@ export default DropdownContenet = () => {
                 imageUri={item.imageUri}
                 grade={item.grade}
                 color={item.color}
-                cardWidth={item.cardWidth}
+                cardWidth={CLIMB_HOLDER_WIDTH}
               />
             </Animated.View>
           );

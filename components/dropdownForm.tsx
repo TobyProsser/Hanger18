@@ -89,6 +89,7 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
             <View
               style={{
                 flex: 1,
+                alignItems: "center",
               }}
             >
               {children}

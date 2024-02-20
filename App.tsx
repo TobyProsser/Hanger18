@@ -13,7 +13,7 @@ import DropdownForm, { BottomSheetRefProps } from "./components/dropdownForm";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useCallback, useRef, useState, useEffect } from "react";
 import DropdownContent from "./components/dropdownContent";
-
+import Dropdown from "./components/dropList";
 import Animated, { useSharedValue } from "react-native-reanimated";
 
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
@@ -65,6 +65,7 @@ export default function App() {
           }}
         >
           <Profile onPress={onPress} />
+
           <LeaderboardList />
           <DropdownForm
             ref={ref}

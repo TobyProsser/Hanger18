@@ -75,7 +75,12 @@ export default LeaderboardList = () => {
               outputRange: [1, 1, 1, 0],
             });
             return (
-              <Animated.View style={[styles.parentContainerStyle]}>
+              <Animated.View
+                style={[
+                  styles.parentContainerStyle,
+                  //{ opacity, transform: [{ scale }] },
+                ]}
+              >
                 <View
                   style={{
                     flexDirection: "row",
@@ -148,8 +153,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 2,
-    opacity,
-    transform: [{ scale }],
+
     top: 50,
   },
 });

@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@shopify/react-native-skia": "0.1.196",
+    "@expo/vector-icons": "13.0.0",
+    "color": "^4.2.3",
     "@types/react": "~18.2.14",
     "expo": "^49.0.22",
     "expo-status-bar": "~1.6.0",

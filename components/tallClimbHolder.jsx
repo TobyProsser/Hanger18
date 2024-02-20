@@ -1,10 +1,32 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Image, ImageBackground } from "react-native";
 import ColorSelect from "./colorSelect";
+import Dropdown from "./dropList";
 
 const CARD_HOLDER_HEIGHT = 375;
 //https://runwildmychild.com/wp-content/uploads/2022/09/Indoor-Rock-Climbing-for-Kids-Climbing-Wall.jpg
+
+const options = [
+  { label: "V0" },
+  { label: "V1" },
+  { label: "V2" },
+  { label: "V3" },
+  { label: "V4" },
+  { label: "V5" },
+  { label: "V6" },
+  { label: "V7" },
+  { label: "V8" },
+  { label: "V9" },
+  { label: "V10" },
+  { label: "V11" },
+  { label: "V12" },
+];
+
+const header = { label: "V#" };
+
 export default TallClimbHolder = ({ imageUri, grade, color, cardWidth }) => {
+  console.log(cardWidth);
+  console.log();
   return (
     <View style={[styles.climbHolder, { width: cardWidth }]}>
       <View>
@@ -19,35 +41,32 @@ export default TallClimbHolder = ({ imageUri, grade, color, cardWidth }) => {
               uri: imageUri,
             }}
             style={{
-              width: cardWidth * 0.9,
-              height: CARD_HOLDER_HEIGHT * 0.9,
+              width: "100%",
+              height: CARD_HOLDER_HEIGHT,
               borderRadius: 25,
               overflow: "hidden",
+              bottom: 17,
             }}
           >
             <View
               style={{
                 flexDirection: "row",
                 width: "100%",
-                justifyContent: "space-between",
                 alignSelf: "center",
-                top: "90%",
-                backgroundColor: "white",
                 padding: 5,
                 paddingTop: -4,
                 opacity: 0.75,
               }}
             >
-              <View style={styles.columnSmall}>
-                <Text style={styles.nameText}>Grade:</Text>
-                <View
-                  style={{
-                    width: 100,
-                    height: 50,
-                    backgroundColor: "red",
-                    borderRadius: 25,
-                  }}
-                ></View>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "red",
+                  bottom: 200,
+                  left: 20,
+                }}
+              >
+                <Dropdown header={header} options={options} />
               </View>
               <View style={styles.columnSmall}>
                 <Text style={styles.nameText}>Color:</Text>
