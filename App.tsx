@@ -54,7 +54,6 @@ export default function App() {
           style={StyleSheet.absoluteFillObject}
           blurRadius={20}
         />
-
         <View
           style={{
             flex: 1,
@@ -72,7 +71,9 @@ export default function App() {
             onToggle={() => toggleActivateFormTouch}
             activateFormTouch={activateFormTouch}
           >
-            <DropdownContent />
+            <View style={{ top: 225 }}>
+              <DropdownContent />
+            </View>
           </DropdownForm>
         </View>
 

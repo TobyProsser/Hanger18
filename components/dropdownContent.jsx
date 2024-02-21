@@ -15,11 +15,10 @@ import TallClimbHolder from "./tallClimbHolder";
 
 const { height: SCREENHEIGHT, width: SCREENWIDTH } = Dimensions.get("screen");
 
-const CLIMB_HOLDER_HIEGHT = 375;
-const CLIMB_HOLDER_WIDTH =
-  Platform.OS === "ios" ? SCREENWIDTH * 0.72 : SCREENWIDTH * 0.74;
-const SPACING = 10;
-const SPACER_ITEM_SIZE = (SCREENWIDTH - CLIMB_HOLDER_WIDTH) * 0.5;
+const CLIMB_HOLDER_HIEGHT = 450;
+const CLIMB_HOLDER_WIDTH = SCREENWIDTH;
+const SPACING = 0;
+const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
 const leftKey = "left_spacer";
 export default DropdownContenet = () => {
   const [climbs, setClimbs] = useState(
@@ -32,24 +31,15 @@ export default DropdownContenet = () => {
       cardWidth: CLIMB_HOLDER_WIDTH,
     }))
   );
-  console.log(CLIMB_HOLDER_WIDTH);
-
-  React.useEffect(() => {
-    if (climbs[0].key !== leftKey) {
-      setClimbs([
-        { key: leftKey, cardWidth: SPACER_ITEM_SIZE },
-        ...climbs,
-        { key: "right-spacer", cardWidth: SPACER_ITEM_SIZE },
-      ]);
-    }
-  }, [climbs]);
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
     <View
       style={{
-        top: SCREENHEIGHT - CLIMB_HOLDER_HIEGHT * 1.5,
+        //top: SCREENHEIGHT - CLIMB_HOLDER_HIEGHT * 1.5,
         flex: 1,
         alignSelf: "center",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <Animated.FlatList
@@ -60,10 +50,11 @@ export default DropdownContenet = () => {
         contentContainerStyle={{
           alignItems: "center",
         }}
-        snapToInterval={CLIMB_HOLDER_WIDTH * 1.5}
-        decelerationRate={Platform.OS === "ios" ? 0 : 0.98}
         renderToHardwareTextureAndroid
         bounces={false}
+        snapToInterval={SCREENWIDTH}
+        decelerationRate={"fast"}
+        position="absolute"
         snapToAlignment="center"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -71,21 +62,10 @@ export default DropdownContenet = () => {
         )}
         scrollEventThrottle={16}
         renderItem={({ item, index }) => {
-          if (!item.imageUri) {
-            return (
-              <View
-                style={{
-                  width: SPACER_ITEM_SIZE,
-                  backgroundColor: "yellow",
-                  height: 200,
-                }}
-              />
-            );
-          }
           const inputRange = [
-            (index - 2) * CLIMB_HOLDER_WIDTH,
             (index - 1) * CLIMB_HOLDER_WIDTH,
             index * CLIMB_HOLDER_WIDTH,
+            (index + 1) * CLIMB_HOLDER_WIDTH,
           ];
           const translateY = scrollX.interpolate({
             inputRange,
@@ -95,11 +75,11 @@ export default DropdownContenet = () => {
           return (
             <Animated.View
               style={{
-                marginHorizontal: SPACING,
-                padding: SPACING * 2,
+                width: CLIMB_HOLDER_WIDTH,
+                height: CLIMB_HOLDER_HIEGHT,
                 alignItems: "center",
+                justifyContent: "center",
                 transform: [{ translateY }],
-                backgroundColor: "white",
                 borderRadius: 34,
               }}
             >

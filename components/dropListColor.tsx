@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { DropListItem, DropListItemType } from "./dropListItem";
+import { ColorDropListItem, DropListItemType } from "./dropListItemColor";
 import Animated, { useSharedValue } from "react-native-reanimated";
 
 type DropdownProps = {
@@ -9,7 +9,11 @@ type DropdownProps = {
   isExpanded: Animated.SharedValue<boolean>;
 };
 
-const Dropdown: React.FC<DropdownProps> = ({ header, options, isExpanded }) => {
+const ColorDropdown: React.FC<DropdownProps> = ({
+  header,
+  options,
+  isExpanded,
+}) => {
   const dropdownItems = [header, ...options];
 
   return (
@@ -20,7 +24,7 @@ const Dropdown: React.FC<DropdownProps> = ({ header, options, isExpanded }) => {
     >
       {dropdownItems.map((item, index) => {
         return (
-          <DropListItem
+          <ColorDropListItem
             key={index}
             index={index}
             {...item}
@@ -33,4 +37,4 @@ const Dropdown: React.FC<DropdownProps> = ({ header, options, isExpanded }) => {
   );
 };
 
-export default Dropdown;
+export default ColorDropdown;

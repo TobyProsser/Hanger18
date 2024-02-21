@@ -74,6 +74,7 @@ export default LeaderboardList = () => {
               inputRange: opacityInputRange,
               outputRange: [1, 1, 1, 0],
             });
+
             return (
               <Animated.View
                 style={[

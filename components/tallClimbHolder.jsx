@@ -1,9 +1,22 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Image, ImageBackground } from "react-native";
+import Color from "color";
 import ColorSelect from "./colorSelect";
 import Dropdown from "./dropList";
+import ColorDropdown from "./dropListColor";
 
-const CARD_HOLDER_HEIGHT = 375;
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  useAnimatedReaction,
+} from "react-native-reanimated";
+
+const CARD_HOLDER_HEIGHT = 350;
+const CARD_HOLDER_WIDTH = 300;
 //https://runwildmychild.com/wp-content/uploads/2022/09/Indoor-Rock-Climbing-for-Kids-Climbing-Wall.jpg
 
 const options = [
@@ -14,7 +27,9 @@ const options = [
   { label: "V4" },
   { label: "V5" },
   { label: "V6" },
-  { label: "V7" },
+];
+
+const options1 = [
   { label: "V8" },
   { label: "V9" },
   { label: "V10" },
@@ -23,147 +38,117 @@ const options = [
 ];
 
 const header = { label: "V#" };
+const header1 = { label: "V7" };
 
 export default TallClimbHolder = ({ imageUri, grade, color, cardWidth }) => {
-  console.log(cardWidth);
-  console.log();
+  const isGradeExpanded = useSharedValue(false);
+  const isColorExpanded = useSharedValue(false);
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(isGradeExpanded.value ? 1 : 0),
+    };
+  }, []);
   return (
     <View style={[styles.climbHolder, { width: cardWidth }]}>
       <View>
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <ImageBackground
-            source={{
-              uri: imageUri,
-            }}
+        {!imageUri ? (
+          <View
             style={{
-              width: "100%",
-              height: CARD_HOLDER_HEIGHT,
+              backgroundColor: "white",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              width: 100,
+              height: 100,
               borderRadius: 25,
-              overflow: "hidden",
-              bottom: 17,
             }}
           >
-            <View
+            <Text style={{ fontSize: 50, top: 15 }}>+</Text>
+          </View>
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "flex-start",
+            }}
+          >
+            <ImageBackground
+              source={{
+                uri: imageUri,
+              }}
               style={{
-                flexDirection: "row",
-                width: "100%",
-                alignSelf: "center",
-                padding: 5,
-                paddingTop: -4,
-                opacity: 0.75,
+                width: CARD_HOLDER_WIDTH,
+                height: CARD_HOLDER_HEIGHT,
+                borderRadius: 25,
+                overflow: "hidden",
+                bottom: 17,
               }}
             >
               <View
                 style={{
-                  flex: 1,
-                  backgroundColor: "red",
-                  bottom: 200,
-                  left: 20,
+                  flexDirection: "row",
+                  height: 100,
+                  opacity: 0.95,
                 }}
               >
-                <Dropdown header={header} options={options} />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 80,
+                    left: 20,
+                  }}
+                >
+                  <View style={[styles.dropListContainer, { bottom: 100 }]}>
+                    <Dropdown
+                      header={header}
+                      options={options}
+                      isExpanded={isGradeExpanded}
+                    />
+                  </View>
+                  <Animated.View
+                    style={[styles.dropListContainer, { bottom: 70 }, rStyle]}
+                  >
+                    <Dropdown
+                      header={header1}
+                      options={options1}
+                      isExpanded={isGradeExpanded}
+                    />
+                  </Animated.View>
+                </View>
+
+                <View
+                  style={{
+                    backgroundColor: "blue",
+                    width: 100,
+                    alignItems: "flex-end",
+                    bottom: 140,
+                  }}
+                >
+                  <ColorDropdown
+                    header={header1}
+                    options={options1}
+                    isExpanded={isColorExpanded}
+                  />
+                </View>
               </View>
-              <View style={styles.columnSmall}>
-                <Text style={styles.nameText}>Color:</Text>
-                <ColorSelect />
-              </View>
-            </View>
-          </ImageBackground>
-        </View>
+            </ImageBackground>
+          </View>
+        )}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  handle: {
-    width: 30,
-    height: 3,
-  },
-  rowStyle: {
-    left: -30,
-    width: 125,
-    height: 40,
-    flexDirection: "row",
-  },
-  columnSmall: {
-    flexDirection: "column",
-  },
-  nameText: {
-    fontSize: 30,
-    fontWeight: "300",
-    textAlign: "center",
-    color: "#6aafdf",
-  },
-  numbersText: {
-    top: 70,
-    width: "100%",
-    fontSize: 25,
-    fontWeight: "100",
-    color: "white",
-  },
-  line: {
-    top: 70,
-    width: 200,
-    height: 1,
-    backgroundColor: "white",
-  },
-  FormContainer: {
-    zIndex: 2,
-    flex: 1,
-    borderRadius: 35,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    elevation: 5, // For shadow on Android
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    paddingBottom: 50,
-  },
+  dropListContainer: {},
   climbHolder: {
-    height: CARD_HOLDER_HEIGHT,
-    backgroundColor: "white",
-    alignSelf: "center",
+    top: 100,
+    alignItems: "center",
     elevation: 5, // For shadow on Android
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     borderRadius: 35,
-    marginVertical: -50,
-    paddingTop: 17.5,
-  },
-  profileImageContainer: {
-    width: 150,
-    height: 150,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 100,
-    elevation: 5, // For shadow on Android
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    //padding: 10,
-    marginTop: 20,
-
-    top: 50,
-  },
-  image: {
-    width: 150,
-    height: 150,
-    marginBottom: 10,
-    borderRadius: 100,
-  },
-  logoImage: {
-    top: 50,
-    width: 150,
-    height: 75,
-    marginTop: 30,
   },
 });
