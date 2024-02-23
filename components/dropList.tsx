@@ -1,15 +1,23 @@
-import React from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { DropListItem, DropListItemType } from "./dropListItem";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
 
 type DropdownProps = {
   header: DropListItemType;
   options: DropListItemType[];
   isExpanded: Animated.SharedValue<boolean>;
+  grade: Dispatch<SetStateAction<number>>;
+  secondRow: boolean;
 };
 
-const Dropdown: React.FC<DropdownProps> = ({ header, options, isExpanded }) => {
+const Dropdown: React.FC<DropdownProps> = ({
+  header,
+  options,
+  isExpanded,
+  grade,
+  secondRow,
+}) => {
   const dropdownItems = [header, ...options];
 
   return (
@@ -25,6 +33,8 @@ const Dropdown: React.FC<DropdownProps> = ({ header, options, isExpanded }) => {
             index={index}
             {...item}
             isExpanded={isExpanded}
+            grade={grade}
+            secondRow={secondRow}
             dropdownItemsCount={dropdownItems.length}
           />
         );

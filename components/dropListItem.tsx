@@ -1,4 +1,10 @@
-import { View, useWindowDimensions, StyleSheet, Text } from "react-native";
+import {
+  View,
+  useWindowDimensions,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
 import Animated, {
   Extrapolate,
   interpolate,
@@ -7,8 +13,10 @@ import Animated, {
   withSpring,
   withTiming,
   useAnimatedReaction,
+  SharedValue,
 } from "react-native-reanimated";
 import Color from "color";
+import { Dispatch, SetStateAction } from "react";
 
 type DropListItemType = {
   label: string;
@@ -18,6 +26,8 @@ type DropListItemProps = DropListItemType & {
   index: number;
   dropdownItemsCount: number;
   isExpanded: Animated.SharedValue<boolean>;
+  grade: Dispatch<SetStateAction<number>>;
+  secondRow: boolean;
 };
 
 const DropListItem: React.FC<DropListItemProps> = ({
@@ -25,6 +35,8 @@ const DropListItem: React.FC<DropListItemProps> = ({
   index,
   dropdownItemsCount,
   isExpanded,
+  grade,
+  secondRow,
 }) => {
   const { width: windowWidth } = useWindowDimensions();
   const DropListItemHeight = 30;
@@ -50,12 +62,13 @@ const DropListItem: React.FC<DropListItemProps> = ({
       backgroundColor: withTiming(
         isExpanded.value ? expandedBackgroundColor : colapsedBackgroundColor
       ),
-      top: withSpring(isExpanded.value ? expandedTop : collapsedTop),
+      top: withSpring(isExpanded.value ? expandedTop : collapsedTop, {
+        damping: 13,
+      }),
       transform: [
         {
           scale: withSpring(isExpanded.value ? expandedScale : collapsedScale),
         },
-        { translateY: fUllDropdiownHeight / 2 },
       ],
     };
   }, []);
@@ -65,9 +78,12 @@ const DropListItem: React.FC<DropListItemProps> = ({
   return (
     <Animated.View
       onTouchEnd={() => {
-        if (isHeader) {
-          isExpanded.value = !isExpanded.value;
+        if (label === "V7") {
+          grade(7);
+        } else {
+          secondRow ? grade(index + 7) : grade(index - 1);
         }
+        isExpanded.value = !isExpanded.value;
       }}
       style={[
         {

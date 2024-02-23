@@ -14,6 +14,8 @@ import {
 import { CTAButton } from "../elements/ctabutton";
 
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import auth from "@react-native-firebase/auth";
+
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
 
@@ -28,7 +30,20 @@ export const Login = () => {
   };
 
   const goToMainFlow = async () => {
-    // Login Query
+    if (email && password) {
+      try {
+        const response = await auth().signInWithEmailAndPassword(
+          email,
+          password
+        );
+
+        if (response.user) {
+          nav.replace("Home");
+        }
+      } catch (e) {
+        Alert.alert(e.nativeErrorMessage);
+      }
+    }
   };
 
   return (
@@ -39,7 +54,7 @@ export const Login = () => {
             <Image source={{ uri: logo }} style={StyleSheet.absoluteFill} />
           </View>
           <View style={styles.mainContent} />
-          <View style={{ bottom: 60 }}>
+          <View style={{ bottom: 250 }}>
             <TextInput
               style={styles.loginTextField}
               placeholder="Email"

@@ -1,4 +1,10 @@
-import { View, useWindowDimensions, StyleSheet, Text } from "react-native";
+import {
+  View,
+  useWindowDimensions,
+  StyleSheet,
+  Text,
+  Alert,
+} from "react-native";
 import Animated, {
   Extrapolate,
   interpolate,
@@ -7,29 +13,39 @@ import Animated, {
   withSpring,
   withTiming,
   useAnimatedReaction,
+  AnimatedStyle,
+  SharedValue,
 } from "react-native-reanimated";
 import Color from "color";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-type DropListItemType = {
+type DropListItemColorType = {
   label: string;
 };
 
-type DropListItemProps = DropListItemType & {
+type DropListItemColorProps = DropListItemColorType & {
   index: number;
   dropdownItemsCount: number;
   isExpanded: Animated.SharedValue<boolean>;
+  color: Dispatch<SetStateAction<string>>;
+  getColor: string;
 };
 
-const ColorDropListItem: React.FC<DropListItemProps> = ({
+const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   label,
   index,
   dropdownItemsCount,
   isExpanded,
+  color,
+  getColor,
 }) => {
   const { width: windowWidth } = useWindowDimensions();
   const DropListItemHeight = 50;
   const DropListItemWidth = 100;
   const Margin = 2;
+
+  const selectedColor = useSharedValue("red");
+  const [selectedColor1, setSelectedColor1] = useState("red");
 
   const fUllDropdiownHeight =
     dropdownItemsCount * (DropListItemHeight + Margin);
@@ -45,17 +61,44 @@ const ColorDropListItem: React.FC<DropListItemProps> = ({
     .lighten(index * 0.25)
     .hex();
 
-  const rStyle = useAnimatedStyle(() => {
+  useEffect(() => {
+    returnColorString(index);
+  }, [getColor]);
+
+  type AnimatedStyle = {
+    backgroundColor: string;
+    top: number;
+    transform: { scale: number }[];
+  };
+
+  const returnColorString = (index: number) => {
+    switch (index) {
+      case 0:
+        return getColor;
+      case 1:
+        return "blue";
+      case 2:
+        return "purple";
+      case 3:
+        return "yellow";
+      case 4:
+        return "grey";
+      case 5:
+        return "green";
+    }
+  };
+  const rStyle = useAnimatedStyle<AnimatedStyle>(() => {
     return {
       backgroundColor: withTiming(
         isExpanded.value ? expandedBackgroundColor : colapsedBackgroundColor
       ),
-      top: withSpring(isExpanded.value ? expandedTop : collapsedTop),
+      top: withSpring(isExpanded.value ? expandedTop : collapsedTop, {
+        damping: 13,
+      }),
       transform: [
         {
           scale: withSpring(isExpanded.value ? expandedScale : collapsedScale),
         },
-        { translateY: fUllDropdiownHeight / 2 },
       ],
     };
   }, []);
@@ -65,9 +108,12 @@ const ColorDropListItem: React.FC<DropListItemProps> = ({
   return (
     <Animated.View
       onTouchEnd={() => {
-        if (isHeader) {
-          isExpanded.value = !isExpanded.value;
+        if (!isHeader) {
+          color(returnColorString(index));
+          setSelectedColor1(returnColorString(index));
+          console.log(getColor);
         }
+        isExpanded.value = !isExpanded.value;
       }}
       style={[
         {
@@ -93,12 +139,12 @@ const ColorDropListItem: React.FC<DropListItemProps> = ({
           alignSelf: "center",
         }}
       >
-        <View
+        <Animated.View
           style={{
             width: 75,
             height: 25,
             borderRadius: 25,
-            backgroundColor: "#F81C1C",
+            backgroundColor: index == 0 ? getColor : returnColorString(index),
           }}
         />
       </View>
@@ -122,4 +168,4 @@ const styles = StyleSheet.create({
 
 export { ColorDropListItem };
 
-export type { DropListItemType };
+export type { DropListItemColorType };

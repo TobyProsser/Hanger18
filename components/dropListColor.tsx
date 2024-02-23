@@ -1,18 +1,22 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { View, StyleSheet } from "react-native";
-import { ColorDropListItem, DropListItemType } from "./dropListItemColor";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import { ColorDropListItem, DropListItemColorType } from "./dropListItemColor";
+import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
 
-type DropdownProps = {
-  header: DropListItemType;
-  options: DropListItemType[];
+type DropListItemColorProps = {
+  header: DropListItemColorType;
+  options: DropListItemColorType[];
   isExpanded: Animated.SharedValue<boolean>;
+  color: Dispatch<SetStateAction<string>>;
+  getColor: string;
 };
 
-const ColorDropdown: React.FC<DropdownProps> = ({
+const ColorDropdown: React.FC<DropListItemColorProps> = ({
   header,
   options,
   isExpanded,
+  color,
+  getColor,
 }) => {
   const dropdownItems = [header, ...options];
 
@@ -29,7 +33,9 @@ const ColorDropdown: React.FC<DropdownProps> = ({
             index={index}
             {...item}
             isExpanded={isExpanded}
+            color={color}
             dropdownItemsCount={dropdownItems.length}
+            getColor={getColor}
           />
         );
       })}

@@ -24,7 +24,8 @@ export const Register = () => {
   const nav = useNavigation<NativeStackNavigationProp<any>>();
 
   const createProfile = async (response: any) => {
-    // Create Profile Query Here
+    db().ref("/users/${respoonse.user.uid}").set({ name });
+    db().ref("/users/${respoonse.user.uid}/leaderboard").set({ totalScore: 0 });
   };
 
   const registerAndGoToMainFlow = async () => {
@@ -37,10 +38,11 @@ export const Register = () => {
 
         if (response.user) {
           await createProfile(response);
-          nav.replace("HomeScreen");
+          nav.replace("Home");
         }
       } catch (e) {
-        Alert.alert("Please try again");
+        console.log(e.message);
+        Alert.alert(e.nativeErrorMessage);
       }
     }
   };
