@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import Profile from "./components/profile";
+import Profile from "./components/homescreen/profile";
 import LeaderboardList from "./components/leaderboardList";
 import DropdownForm, { BottomSheetRefProps } from "./components/dropdownForm";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -15,10 +15,18 @@ import { useCallback, useRef, useState, useEffect } from "react";
 import DropdownContent from "./components/dropdownContent";
 import Dropdown from "./components/dropList";
 import Animated, { useSharedValue } from "react-native-reanimated";
-
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import HomeScreen from "./components/homescreen/homeScreen";
+import { Login } from "./components/login/login";
+import { Register } from "./components/login/register";
+import { LoadingScreen } from "./components/login/loadingScreen";
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
+
+//APP ID: com.fathomcreative.hanger18
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   const ref = useRef<BottomSheetRefProps>(null);
@@ -42,44 +50,37 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    console.log("ActiveTouch: " + activateFormTouch);
-  }, [activateFormTouch]);
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Image
-          source={{ uri: logo }}
-          style={StyleSheet.absoluteFillObject}
-          blurRadius={20}
-        />
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            flexDirection: "column",
-            backgroundColor: "#2a3641",
-            gap: -30,
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen
+          name="LoadingScreen"
+          component={LoadingScreen}
+          options={{
+            headerShown: false,
           }}
-        >
-          <Profile onPress={onPress} />
-
-          <LeaderboardList />
-          <DropdownForm
-            ref={ref}
-            onToggle={() => toggleActivateFormTouch}
-            activateFormTouch={activateFormTouch}
-          >
-            <View style={{ top: 225 }}>
-              <DropdownContent />
-            </View>
-          </DropdownForm>
-        </View>
-
-        <StatusBar style="auto" />
-      </View>
-    </GestureHandlerRootView>
+        />
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={Register}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

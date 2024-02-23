@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyD7qOt0TW1R0SKy7g_R9HlpgJa-ZIQdoSg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>884917092791</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.fathomcreative.hanger18</string>
+	<key>PROJECT_ID</key>
+	<string>hanger18-cdfd6</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hanger18-cdfd6.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:884917092791:ios:78e7d8806a27d170d5a832</string>
+</dict>
+</plist>

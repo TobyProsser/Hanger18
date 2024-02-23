@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "884917092791",
+    "project_id": "hanger18-cdfd6",
+    "storage_bucket": "hanger18-cdfd6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884917092791:android:2b025b76a027612dd5a832",
+        "android_client_info": {
+          "package_name": "com.fathomcreative.hanger18"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTTqQBj7x6aS64WD4Ola_MdcwY-JfxXOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
