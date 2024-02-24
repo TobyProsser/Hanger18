@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StatusBar,
   Text,
@@ -12,6 +12,10 @@ import {
   Platform,
 } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
+import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
+import { FeedClimb } from "./types/FeedClimb";
+import auth from "@react-native-firebase/auth";
+import db from "@react-native-firebase/database";
 
 const { height: SCREENHEIGHT, width: SCREENWIDTH } = Dimensions.get("screen");
 
@@ -20,17 +24,35 @@ const CLIMB_HOLDER_WIDTH = SCREENWIDTH;
 const SPACING = 0;
 const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
 const leftKey = "left_spacer";
-export default DropdownContenet = () => {
-  const [climbs, setClimbs] = useState(
-    Array.from({ length: 10 }, (_, i) => ({
-      key: `${i}`,
-      imageUri:
-        "https://runwildmychild.com/wp-content/uploads/2022/09/Indoor-Rock-Climbing-for-Kids-Climbing-Wall.jpg",
-      grade: Math.floor(Math.random() * 12) + 1,
-      color: "red",
-      cardWidth: CLIMB_HOLDER_WIDTH,
-    }))
-  );
+
+const DropdownContenet = ({ currentUser }) => {
+  const [feed, setFeed] = useState<FeedClimb[]>([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [limit, setLimit] = useState(10);
+  const [imageUri, setImageUri] = useState('null');
+
+
+  const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
+    if (snapshot.val()) {
+      const values: FeedClimb[] = Object.values(snapshot.val());
+      values.sort((a, b) => b.date - a.date);
+      setFeed([...values, {date: null, grade: 0, color: 'null', imageUri: 'null',}]);
+      console.log('FeedLength: ' + feed.length);
+    }
+  };
+
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    const refPath = `/users/${currentUser.uid}/sessions`;
+    db()
+      .ref(refPath)
+      .orderByKey()
+      .limitToLast(limit)
+      .on("value", onClimbChange);
+
+    return () => db().ref(refPath).off("value", onClimbChange);
+  }, [limit]);
+
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
     <View
@@ -44,7 +66,7 @@ export default DropdownContenet = () => {
     >
       <Animated.FlatList
         showsHorizontalScrollIndicator={false}
-        data={climbs}
+        data={feed}
         keyExtractor={(item) => item.key}
         horizontal
         contentContainerStyle={{
@@ -54,7 +76,6 @@ export default DropdownContenet = () => {
         bounces={false}
         snapToInterval={SCREENWIDTH}
         decelerationRate={"fast"}
-        position="absolute"
         snapToAlignment="center"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -85,9 +106,11 @@ export default DropdownContenet = () => {
             >
               <TallClimbHolder
                 imageUri={item.imageUri}
+                setImageUri={setImageUri}
                 grade={item.grade}
                 color={item.color}
                 cardWidth={CLIMB_HOLDER_WIDTH}
+                key={item.key}
               />
             </Animated.View>
           );
@@ -96,3 +119,5 @@ export default DropdownContenet = () => {
     </View>
   );
 };
+
+export default DropdownContenet;

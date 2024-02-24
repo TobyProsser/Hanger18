@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dispatch } from "react";
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,7 @@ import Animated, {
   withTiming,
   useAnimatedReaction,
 } from "react-native-reanimated";
+import * as ImagePicker from "expo-image-picker";
 
 const CARD_HOLDER_HEIGHT = 350;
 const CARD_HOLDER_WIDTH = 300;
@@ -53,34 +54,51 @@ const header1 = { label: "V7" };
 
 interface ITallClimbHolderProps {
   imageUri: string;
+  setImageUri: Dispatch<any>;
   grade: number;
   color: string;
   cardWidth: number;
+  key: string;
 }
 
 const TallClimbHolder = (prop: ITallClimbHolderProps) => {
-  const [time, setTime] = useState(0);
   const [grade1, setGrade1] = useState(-1);
-  const [color1, setColor1] = useState("");
-
+  const [color1, setColor1] = useState("null");
   const isGradeExpanded = useSharedValue(false);
   const isColorExpanded = useSharedValue(false);
 
   const [header, setHeader] = useState({ label: "V#" });
 
   const climbSubmitted = useSharedValue(false);
-  const grade = useSharedValue(-1);
-  const color = useSharedValue("red");
 
   const submitClimb = async (
     grade: number,
     color: string,
-    imageUri: string
+    imageUri: string,
+    key: string,
+    finalSubmit: boolean,
   ) => {
-    climbSubmitted.value = true;
+    
+    if(finalSubmit){climbSubmitted.value = true;}
+    
     const currentUser = auth().currentUser;
     if (currentUser) {
-      await saveClimb(grade, color, imageUri, currentUser.uid);
+      await saveClimb(grade, color, imageUri, key, currentUser.uid);
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      prop.setImageUri(result.assets[0].uri);
+      console.log("porp uri:" + prop.imageUri);
+      submitClimb(prop.grade, prop.color, result.assets[0].uri, prop.key, false);
     }
   };
 
@@ -89,24 +107,34 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       setHeader({ label: "V#" });
     } else {
       setHeader({ label: "V" + grade1 });
+      prop.grade = grade1;
     }
-    console.log(grade1);
+    
   }, [grade1]);
 
-  useEffect(() => {}, [color1]);
+  useEffect(() => {
+    if(prop.grade != -1)
+    {
+      setHeader({label:  "V" + prop.grade});
+      console.log("Header LOg: " + prop.grade);
+    }
+    
+  }, []);
 
   const saveClimb = async (
     grade: number,
     color: string,
     imageUri: string,
+    key: string,
     currentUser: string
   ) => {
     const sessionId = Date.now();
 
-    await db().ref("/users/${currentUser}/sessions/${seesionId}").set({
+    await db().ref(`/users/${currentUser}/sessions/${sessionId}`).set({
       grade,
       color,
       imageUri,
+      key: sessionId + currentUser,
       date: sessionId,
     });
   };
@@ -119,8 +147,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   return (
     <View style={[styles.climbHolder, { width: prop.cardWidth }]}>
       <View>
-        {!prop.imageUri ? (
+        {!prop.imageUri || prop.imageUri == 'null'? (
           <View
+            onTouchEnd={() => {
+              pickImage();
+            }}
             style={{
               backgroundColor: "white",
               alignItems: "center",
@@ -172,14 +203,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                       header={header}
                       options={options}
                       isExpanded={isGradeExpanded}
-                      grade={setGrade1}
+                      grade={grade1}
+                      setGrade = {setGrade1}
                       secondRow={false}
                     />
                   </View>
                   <Animated.View
-                    onTouchEnd={() => {
-                      console.log("hello");
-                    }}
                     style={[
                       styles.dropListContainer,
                       { top: 32 },
@@ -194,7 +223,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                       header={header1}
                       options={options1}
                       isExpanded={isGradeExpanded}
-                      grade={setGrade1}
+                      grade={grade1}
+                      setGrade = {setGrade1}
                       secondRow={true}
                     />
                   </Animated.View>
@@ -218,10 +248,10 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                   />
                 </View>
               </View>
-              {!color && !grade ? (
+              {color1 && grade1 != -1 && climbSubmitted? (
                 <View
                   onTouchEnd={() => {
-                    submitClimb(prop.grade, prop.color, prop.imageUri);
+                    submitClimb(grade1, color1, prop.imageUri, '', true);
                   }}
                   style={{
                     width: "100%",

@@ -16,7 +16,7 @@ import Animated, {
   SharedValue,
 } from "react-native-reanimated";
 import Color from "color";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 type DropListItemType = {
   label: string;
@@ -26,7 +26,8 @@ type DropListItemProps = DropListItemType & {
   index: number;
   dropdownItemsCount: number;
   isExpanded: Animated.SharedValue<boolean>;
-  grade: Dispatch<SetStateAction<number>>;
+  setGrade: Dispatch<SetStateAction<number>>;
+  grade: number;
   secondRow: boolean;
 };
 
@@ -37,8 +38,10 @@ const DropListItem: React.FC<DropListItemProps> = ({
   isExpanded,
   grade,
   secondRow,
+  setGrade,
 }) => {
   const { width: windowWidth } = useWindowDimensions();
+  const [gradeSet, setGradeSet] = useState(false);
   const DropListItemHeight = 30;
   const DropListItemWidth = 75;
   const Margin = 2;
@@ -73,17 +76,26 @@ const DropListItem: React.FC<DropListItemProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if(grade != -1)
+    {
+      setGradeSet(true);
+    }
+  }, [])
+  
   const isHeader = index === 0;
-
   return (
     <Animated.View
       onTouchEnd={() => {
-        if (label === "V7") {
-          grade(7);
-        } else {
-          secondRow ? grade(index + 7) : grade(index - 1);
+        if(!gradeSet)
+        {
+          if (label === "V7") {
+            setGrade(7);
+          } else {
+            secondRow ? setGrade(index + 7) : setGrade(index - 1);
+          }
+          isExpanded.value = !isExpanded.value;
         }
-        isExpanded.value = !isExpanded.value;
       }}
       style={[
         {

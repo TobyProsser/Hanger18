@@ -33,6 +33,7 @@
     "plugins": [
       "expo-build-properties",
       "@react-native-firebase/app",
+      "expo-image-picker",
       [
         "expo-build-properties",
         {

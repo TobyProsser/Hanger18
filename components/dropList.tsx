@@ -7,7 +7,8 @@ type DropdownProps = {
   header: DropListItemType;
   options: DropListItemType[];
   isExpanded: Animated.SharedValue<boolean>;
-  grade: Dispatch<SetStateAction<number>>;
+  setGrade: Dispatch<SetStateAction<number>>;
+  grade: number,
   secondRow: boolean;
 };
 
@@ -17,6 +18,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   isExpanded,
   grade,
   secondRow,
+  setGrade,
 }) => {
   const dropdownItems = [header, ...options];
 
@@ -34,6 +36,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             {...item}
             isExpanded={isExpanded}
             grade={grade}
+            setGrade={setGrade}
             secondRow={secondRow}
             dropdownItemsCount={dropdownItems.length}
           />

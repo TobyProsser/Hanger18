@@ -45,7 +45,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   const Margin = 2;
 
   const selectedColor = useSharedValue("red");
-  const [selectedColor1, setSelectedColor1] = useState("red");
+  const [colorSet, setColorSet] = useState(false);
 
   const fUllDropdiownHeight =
     dropdownItemsCount * (DropListItemHeight + Margin);
@@ -62,8 +62,8 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
     .hex();
 
   useEffect(() => {
-    returnColorString(index);
-  }, [getColor]);
+    setColorSet(getColor != 'null');
+  }, []);
 
   type AnimatedStyle = {
     backgroundColor: string;
@@ -72,6 +72,10 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   };
 
   const returnColorString = (index: number) => {
+    if(colorSet)
+    {
+      return getColor;
+    }
     switch (index) {
       case 0:
         return getColor;
@@ -108,12 +112,14 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   return (
     <Animated.View
       onTouchEnd={() => {
-        if (!isHeader) {
-          color(returnColorString(index));
-          setSelectedColor1(returnColorString(index));
-          console.log(getColor);
+        if(!colorSet)
+        {
+          if (!isHeader) {
+            color(returnColorString(index));
+            console.log(getColor);
+          }
+          isExpanded.value = !isExpanded.value;
         }
-        isExpanded.value = !isExpanded.value;
       }}
       style={[
         {
