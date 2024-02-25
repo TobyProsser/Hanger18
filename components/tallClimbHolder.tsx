@@ -58,7 +58,7 @@ interface ITallClimbHolderProps {
   grade: number;
   color: string;
   cardWidth: number;
-  key: string;
+  keyString: string;
 }
 
 const TallClimbHolder = (prop: ITallClimbHolderProps) => {
@@ -75,15 +75,16 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     grade: number,
     color: string,
     imageUri: string,
-    key: string,
-    finalSubmit: boolean,
+    keyString: string,
+    finalSubmit: boolean
   ) => {
-    
-    if(finalSubmit){climbSubmitted.value = true;}
-    
+    if (finalSubmit) {
+      climbSubmitted.value = true;
+    }
+
     const currentUser = auth().currentUser;
     if (currentUser) {
-      await saveClimb(grade, color, imageUri, key, currentUser.uid);
+      await saveClimb(grade, color, imageUri, keyString, currentUser.uid);
     }
   };
 
@@ -97,8 +98,14 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
     if (!result.canceled) {
       prop.setImageUri(result.assets[0].uri);
-      console.log("porp uri:" + prop.imageUri);
-      submitClimb(prop.grade, prop.color, result.assets[0].uri, prop.key, false);
+
+      submitClimb(
+        prop.grade,
+        prop.color,
+        result.assets[0].uri,
+        prop.keyString,
+        false
+      );
     }
   };
 
@@ -109,34 +116,32 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       setHeader({ label: "V" + grade1 });
       prop.grade = grade1;
     }
-    
   }, [grade1]);
 
   useEffect(() => {
-    if(prop.grade != -1)
-    {
-      setHeader({label:  "V" + prop.grade});
-      console.log("Header LOg: " + prop.grade);
+    if (prop.grade != -1) {
+      setHeader({ label: "V" + prop.grade });
     }
-    
   }, []);
 
   const saveClimb = async (
     grade: number,
     color: string,
     imageUri: string,
-    key: string,
+    keyString: string,
     currentUser: string
   ) => {
     const sessionId = Date.now();
 
-    await db().ref(`/users/${currentUser}/sessions/${sessionId}`).set({
-      grade,
-      color,
-      imageUri,
-      key: sessionId + currentUser,
-      date: sessionId,
-    });
+    await db()
+      .ref(`/users/${currentUser}/sessions/${sessionId}`)
+      .set({
+        grade,
+        color,
+        imageUri,
+        key: sessionId + currentUser,
+        date: sessionId,
+      });
   };
 
   const rStyle = useAnimatedStyle(() => {
@@ -147,13 +152,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   return (
     <View style={[styles.climbHolder, { width: prop.cardWidth }]}>
       <View>
-        {!prop.imageUri || prop.imageUri == 'null'? (
+        {!prop.imageUri || prop.imageUri == "null" ? (
           <View
             onTouchEnd={() => {
               pickImage();
             }}
             style={{
-              backgroundColor: "white",
               alignItems: "center",
               justifyContent: "flex-start",
               width: 100,
@@ -204,7 +208,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                       options={options}
                       isExpanded={isGradeExpanded}
                       grade={grade1}
-                      setGrade = {setGrade1}
+                      setGrade={setGrade1}
                       secondRow={false}
                     />
                   </View>
@@ -224,7 +228,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                       options={options1}
                       isExpanded={isGradeExpanded}
                       grade={grade1}
-                      setGrade = {setGrade1}
+                      setGrade={setGrade1}
                       secondRow={true}
                     />
                   </Animated.View>
@@ -248,10 +252,13 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                   />
                 </View>
               </View>
-              {color1 && grade1 != -1 && climbSubmitted? (
+              {color1 && grade1 != -1 && climbSubmitted ? (
                 <View
                   onTouchEnd={() => {
-                    submitClimb(grade1, color1, prop.imageUri, '', true);
+                    submitClimb(grade1, color1, prop.imageUri, "", true);
+                    console.log(
+                      "the climb was submitted with the color of: " + color1
+                    );
                   }}
                   style={{
                     width: "100%",

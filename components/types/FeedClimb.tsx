@@ -1,8 +1,8 @@
 export interface FeedClimb {
   key?: string;
-  date: number;
+  date?: number;
   name?: string;
-  grade: number;
-  color: string;
-  imageUri: string;
+  grade?: number;
+  color?: string;
+  imageUri?: string;
 }

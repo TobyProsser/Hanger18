@@ -22,7 +22,7 @@ const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
 
 export default function HomeScreen() {
-  const ref = useRef<BottomSheetRefProps>(null);
+  const ref = useRef<BottomSheetRefProps>();
 
   const [activateFormTouch, setActivateFormTouch] = useState(false);
   const toggleActivateFormTouch = useCallback(() => {

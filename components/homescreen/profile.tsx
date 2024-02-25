@@ -17,7 +17,6 @@ const Profile = (prop: IProfileProps) => {
   };
 
   function handleClick() {
-    console.log("pressed");
     prop.onPress();
   }
 

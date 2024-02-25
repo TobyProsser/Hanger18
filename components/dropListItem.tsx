@@ -76,17 +76,21 @@ const DropListItem: React.FC<DropListItemProps> = ({
     };
   }, []);
 
+  //If grade has data, set gradeSet? true
   useEffect(() => {
     if(grade != -1)
     {
       setGradeSet(true);
+      console.log("The grade has been set ")
     }
-  }, [])
+  }, [grade])
   
   const isHeader = index === 0;
+
   return (
     <Animated.View
       onTouchEnd={() => {
+        //If grade is set, dont allow user to click on button
         if(!gradeSet)
         {
           if (label === "V7") {

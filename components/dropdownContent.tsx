@@ -25,19 +25,35 @@ const SPACING = 0;
 const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
 const leftKey = "left_spacer";
 
-const DropdownContenet = ({ currentUser }) => {
+
+
+//{ currentUser } in ()
+const DropdownContenet = () => {
   const [feed, setFeed] = useState<FeedClimb[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [limit, setLimit] = useState(10);
   const [imageUri, setImageUri] = useState('null');
 
+  let climbSpacer: FeedClimb = {
+    key: "1",
+    date: Date.now(),
+    name: "My Climb",
+    grade: 5,
+    color: "red",
+    imageUri: "https://example.com/image.jpg",
+  };
+  
+  
 
   const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
     if (snapshot.val()) {
-      const values: FeedClimb[] = Object.values(snapshot.val());
+      const values: FeedClimb[] = Array.isArray(snapshot.val()) ? snapshot.val() : Object.values(snapshot.val());
       values.sort((a, b) => b.date - a.date);
-      setFeed([...values, {date: null, grade: 0, color: 'null', imageUri: 'null',}]);
+      setFeed([...values,]);
       console.log('FeedLength: ' + feed.length);
+      setLimit(10);
+
+     
     }
   };
 
@@ -56,6 +72,9 @@ const DropdownContenet = ({ currentUser }) => {
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
     <View
+    onTouchEnd={() => {
+      console.log("feed count: " + feed.length)
+    }}
       style={{
         //top: SCREENHEIGHT - CLIMB_HOLDER_HIEGHT * 1.5,
         flex: 1,

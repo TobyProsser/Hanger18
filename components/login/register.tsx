@@ -24,8 +24,28 @@ export const Register = () => {
   const nav = useNavigation<NativeStackNavigationProp<any>>();
 
   const createProfile = async (response: any) => {
-    db().ref("/users/${respoonse.user.uid}").set({ name });
-    db().ref("/users/${respoonse.user.uid}/leaderboard").set({ totalScore: 0 });
+    db().ref(`/users/${response.user.uid}`).set({ name });
+    db().ref(`/users/${response.user.uid}/leaderboard`).set({ totalScore: 0 });
+  };
+
+  const saveClimb = async (
+    grade: number,
+    color: string,
+    imageUri: string,
+    key: string,
+    currentUser: string
+  ) => {
+    const sessionId = Date.now();
+
+    await db()
+      .ref(`/users/${currentUser}/sessions/${sessionId}`)
+      .set({
+        grade,
+        color,
+        imageUri,
+        key: sessionId + currentUser,
+        date: sessionId,
+      });
   };
 
   const registerAndGoToMainFlow = async () => {
@@ -38,6 +58,13 @@ export const Register = () => {
 
         if (response.user) {
           await createProfile(response);
+          const currentUser = auth().currentUser;
+
+          //Save an empty climb, this acts as the adding button at the end of the climbs list
+          if (currentUser) {
+            await saveClimb(0, "null", "null", "Adder", currentUser.uid);
+          }
+          console.log("CLIMB SAVED");
           nav.replace("Home");
         }
       } catch (e) {

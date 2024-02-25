@@ -61,8 +61,10 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
     .lighten(index * 0.25)
     .hex();
 
+    //if color has data set ColorSet? true
   useEffect(() => {
     setColorSet(getColor != 'null');
+    console.log("the Color is Set as: " + getColor);
   }, []);
 
   type AnimatedStyle = {
@@ -112,6 +114,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   return (
     <Animated.View
       onTouchEnd={() => {
+        //If the color has been set, dont allow the user to click on the color drop down
         if(!colorSet)
         {
           if (!isHeader) {
