@@ -64,11 +64,9 @@ export const Register = () => {
           if (currentUser) {
             await saveClimb(0, "null", "null", "Adder", currentUser.uid);
           }
-          console.log("CLIMB SAVED");
           nav.replace("Home");
         }
       } catch (e) {
-        console.log(e.message);
         Alert.alert(e.nativeErrorMessage);
       }
     }

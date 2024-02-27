@@ -29,6 +29,7 @@ type DropListItemColorProps = DropListItemColorType & {
   isExpanded: Animated.SharedValue<boolean>;
   color: Dispatch<SetStateAction<string>>;
   getColor: string;
+  submitted: boolean;
 };
 
 const ColorDropListItem: React.FC<DropListItemColorProps> = ({
@@ -38,6 +39,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   isExpanded,
   color,
   getColor,
+  submitted,
 }) => {
   const { width: windowWidth } = useWindowDimensions();
   const DropListItemHeight = 50;
@@ -45,7 +47,6 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   const Margin = 2;
 
   const selectedColor = useSharedValue("red");
-  const [colorSet, setColorSet] = useState(false);
 
   const fUllDropdiownHeight =
     dropdownItemsCount * (DropListItemHeight + Margin);
@@ -61,12 +62,6 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
     .lighten(index * 0.25)
     .hex();
 
-    //if color has data set ColorSet? true
-  useEffect(() => {
-    setColorSet(getColor != 'null');
-    console.log("the Color is Set as: " + getColor);
-  }, []);
-
   type AnimatedStyle = {
     backgroundColor: string;
     top: number;
@@ -74,8 +69,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   };
 
   const returnColorString = (index: number) => {
-    if(colorSet)
-    {
+    if (submitted) {
       return getColor;
     }
     switch (index) {
@@ -115,11 +109,9 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
     <Animated.View
       onTouchEnd={() => {
         //If the color has been set, dont allow the user to click on the color drop down
-        if(!colorSet)
-        {
+        if (!submitted) {
           if (!isHeader) {
             color(returnColorString(index));
-            console.log(getColor);
           }
           isExpanded.value = !isExpanded.value;
         }
@@ -142,7 +134,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
           width: 80,
           height: 30,
           borderRadius: 25,
-          backgroundColor: "#282424",
+          backgroundColor: "#412A2A",
           alignItems: "center",
           justifyContent: "center",
           alignSelf: "center",

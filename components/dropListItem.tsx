@@ -29,6 +29,7 @@ type DropListItemProps = DropListItemType & {
   setGrade: Dispatch<SetStateAction<number>>;
   grade: number;
   secondRow: boolean;
+  submitted;
 };
 
 const DropListItem: React.FC<DropListItemProps> = ({
@@ -39,9 +40,9 @@ const DropListItem: React.FC<DropListItemProps> = ({
   grade,
   secondRow,
   setGrade,
+  submitted,
 }) => {
   const { width: windowWidth } = useWindowDimensions();
-  const [gradeSet, setGradeSet] = useState(false);
   const DropListItemHeight = 30;
   const DropListItemWidth = 75;
   const Margin = 2;
@@ -76,23 +77,13 @@ const DropListItem: React.FC<DropListItemProps> = ({
     };
   }, []);
 
-  //If grade has data, set gradeSet? true
-  useEffect(() => {
-    if(grade != -1)
-    {
-      setGradeSet(true);
-      console.log("The grade has been set ")
-    }
-  }, [grade])
-  
   const isHeader = index === 0;
 
   return (
     <Animated.View
       onTouchEnd={() => {
         //If grade is set, dont allow user to click on button
-        if(!gradeSet)
-        {
+        if (!submitted) {
           if (label === "V7") {
             setGrade(7);
           } else {

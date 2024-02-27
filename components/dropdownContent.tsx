@@ -25,37 +25,30 @@ const SPACING = 0;
 const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
 const leftKey = "left_spacer";
 
-
-
 //{ currentUser } in ()
 const DropdownContenet = () => {
   const [feed, setFeed] = useState<FeedClimb[]>([]);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [limit, setLimit] = useState(10);
-  const [imageUri, setImageUri] = useState('null');
-
-  let climbSpacer: FeedClimb = {
-    key: "1",
-    date: Date.now(),
-    name: "My Climb",
-    grade: 5,
-    color: "red",
-    imageUri: "https://example.com/image.jpg",
-  };
-  
-  
+  const [imageUri, setImageUri] = useState("null");
+  const [curSessionId, setCurSessionId] = useState(Date.now);
+  const flatListRef = React.useRef<FlatList>(null);
 
   const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
     if (snapshot.val()) {
-      const values: FeedClimb[] = Array.isArray(snapshot.val()) ? snapshot.val() : Object.values(snapshot.val());
+      const values: FeedClimb[] = Array.isArray(snapshot.val())
+        ? snapshot.val()
+        : Object.values(snapshot.val());
       values.sort((a, b) => b.date - a.date);
-      setFeed([...values,]);
-      console.log('FeedLength: ' + feed.length);
+      setFeed([...values]);
       setLimit(10);
-
-     
     }
   };
+
+  React.useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+    }
+  }, [curSessionId]); // Replace 'yourVariable' with the variable you're tracking
 
   useEffect(() => {
     const currentUser = auth().currentUser;
@@ -72,9 +65,6 @@ const DropdownContenet = () => {
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
     <View
-    onTouchEnd={() => {
-      console.log("feed count: " + feed.length)
-    }}
       style={{
         //top: SCREENHEIGHT - CLIMB_HOLDER_HIEGHT * 1.5,
         flex: 1,
@@ -84,6 +74,7 @@ const DropdownContenet = () => {
       }}
     >
       <Animated.FlatList
+        ref={flatListRef}
         showsHorizontalScrollIndicator={false}
         data={feed}
         keyExtractor={(item) => item.key}
@@ -130,6 +121,9 @@ const DropdownContenet = () => {
                 color={item.color}
                 cardWidth={CLIMB_HOLDER_WIDTH}
                 key={item.key}
+                keyString={"null"}
+                sessionId={curSessionId}
+                setCurSessionId={setCurSessionId}
               />
             </Animated.View>
           );
