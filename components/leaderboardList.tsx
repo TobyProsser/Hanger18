@@ -1,18 +1,11 @@
-import React, { useState } from "react";
+import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
+import React, { useEffect, useState } from "react";
 import { Dimensions } from "react-native";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  StatusBar,
-  FlatList,
-  Animated,
-  TouchableOpacity,
-  Easing,
-  SafeAreaViewBase,
-  SafeAreaView,
-} from "react-native";
+import { StyleSheet, Text, View, Image, Animated } from "react-native";
+
+import db from "@react-native-firebase/database";
+import { FeedClimb } from "./types/feedclimb";
+
 const { width, height } = Dimensions.get("screen");
 
 const logo =
@@ -37,14 +30,33 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING * 3;
 var opacity;
 var scale = 1;
 
-export default LeaderboardList = () => {
+const LeaderboardList = () => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
+
+  const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
+
+  const onLeaderboardChange = (
+    snapshot: FirebaseDatabaseTypes.DataSnapshot
+  ) => {
+    if (snapshot.val()) {
+      const values: FeedClimb[] = Array.isArray(snapshot.val())
+        ? snapshot.val()
+        : Object.values(snapshot.val());
+      setLeaderboard(values);
+    }
+  };
+
+  useEffect(() => {
+    const refPath = "/leaderboard";
+    db().ref(refPath).on("value", onLeaderboardChange);
+    return () => db().ref(refPath).off("value", onLeaderboardChange);
+  }, []);
 
   return (
     <View style={{ padding: 20, zIndex: 1 }}>
       <View>
         <Animated.FlatList
-          data={DATA}
+          data={leaderboard}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: true }
@@ -66,10 +78,10 @@ export default LeaderboardList = () => {
               ITEM_SIZE * index,
               ITEM_SIZE * (index + 0.5),
             ];
-            scale = scrollY.interpolate({
-              inputRange,
-              outputRange: [1, 1, 1, 0],
-            });
+            // scale = scrollY.interpolate({
+            //   inputRange,
+            //   outputRange: [1, 1, 1, 0],
+            // });
             opacity = scrollY.interpolate({
               inputRange: opacityInputRange,
               outputRange: [1, 1, 1, 0],
@@ -93,7 +105,7 @@ export default LeaderboardList = () => {
                 >
                   <View>
                     <Image
-                      source={{ uri: item.image }}
+                      source={{ uri: item.imageUri }}
                       style={{
                         width: AVATAR_SIZE,
                         height: AVATAR_SIZE,
@@ -115,12 +127,12 @@ export default LeaderboardList = () => {
                     <Text
                       style={{ fontSize: 22, opacity: 0.7, color: "white" }}
                     >
-                      {item.jobTitle}
+                      {item.date}
                     </Text>
                     <Text
                       style={{ fontSize: 22, opacity: 0.8, color: "#C1E3EE" }}
                     >
-                      {item.email}
+                      {item.color}
                     </Text>
                   </View>
                 </View>
@@ -132,6 +144,8 @@ export default LeaderboardList = () => {
     </View>
   );
 };
+
+export default LeaderboardList;
 
 const styles = StyleSheet.create({
   rowStyle: {

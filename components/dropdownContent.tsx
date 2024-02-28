@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
-import { FeedClimb } from "./types/FeedClimb";
+import { FeedClimb } from "./types/feedclimb";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 
@@ -121,7 +121,6 @@ const DropdownContenet = () => {
                 color={item.color}
                 cardWidth={CLIMB_HOLDER_WIDTH}
                 key={item.key}
-                keyString={"null"}
                 sessionId={curSessionId}
                 setCurSessionId={setCurSessionId}
               />

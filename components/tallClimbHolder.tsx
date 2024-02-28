@@ -26,6 +26,8 @@ import Animated, {
   useAnimatedReaction,
 } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
+import { FeedClimb } from "./types/feedclimb";
+import { LeaderboardEntry } from "./types/leaderboardentry";
 
 const CARD_HOLDER_HEIGHT = 350;
 const CARD_HOLDER_WIDTH = 300;
@@ -58,7 +60,6 @@ interface ITallClimbHolderProps {
   grade: number;
   color: string;
   cardWidth: number;
-  keyString: string;
   sessionId: number;
   setCurSessionId: Dispatch<any>;
 }
@@ -73,15 +74,78 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
 
+  const sortAndSave = async (allValues: LeaderboardEntry[]) => {
+    allValues.sort((a, b) => b.overallScore - a.overallScore);
+
+    if (allValues.length > 3) {
+      allValues.pop();
+    }
+
+    const newLeaderboard = allValues.reduce((acc, cur, index) => {
+      acc.set(index, cur);
+      return acc;
+    }, new Map<Number, LeaderboardEntry>());
+
+    await db()
+      .ref("/")
+      .update({ leaderboard: Object.fromEntries(newLeaderboard) });
+  };
+
+  const updateLeaderboard = async (
+    grades: number,
+    color: string,
+    imageUri: string,
+    currentUser: string
+  ) => {
+    const user = await db().ref(`/users/${currentUser}`).once("value");
+    const userName = user.val().name as string;
+
+    const totalGradePath = `/users/${currentUser}/leaderboard/`;
+    const gradesSnapshot = await db().ref(totalGradePath).once("value");
+    const totalGrades = (gradesSnapshot.val().totalScore as number) + grades;
+    //Save new totalgrade to local user
+    await db().ref(totalGradePath).update({ totalScore: totalGrades });
+
+    const leaderboard = await db().ref(`/leaderboard`).once("value");
+    let leaderboardCopy = { ...leaderboard.val() };
+    let allValues: LeaderboardEntry[] = Object.values(leaderboardCopy);
+
+    const leaderboardIndex = allValues.findIndex(
+      (value) => value.name === userName
+    );
+
+    if (leaderboardIndex > -1) {
+      console.log("OverallScore1 " + totalGrades + " " + allValues);
+
+      allValues[leaderboardIndex] = {
+        currentUser: currentUser,
+        overallScore: totalGrades,
+        name: userName,
+        key: Date.now + currentUser,
+      };
+
+      sortAndSave(allValues);
+    } else {
+      console.log("OverallScore " + totalGrades + " " + allValues);
+      allValues.push({
+        currentUser: currentUser,
+        overallScore: totalGrades,
+        name: userName,
+        key: Date.now + currentUser,
+      });
+
+      sortAndSave(allValues);
+    }
+  };
+
   const submitClimb = async (
     grade: number,
     color: string,
-    imageUri: string,
-    keyString: string
+    imageUri: string
   ) => {
     const currentUser = auth().currentUser;
     if (currentUser) {
-      await saveClimb(grade, color, imageUri, keyString, currentUser.uid);
+      await saveClimb(grade, color, imageUri, currentUser.uid);
     }
   };
 
@@ -96,7 +160,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     if (!result.canceled) {
       prop.setImageUri(result.assets[0].uri);
 
-      submitClimb(-1, "null", result.assets[0].uri, prop.keyString);
+      submitClimb(-1, "null", result.assets[0].uri);
     }
   };
 
@@ -123,13 +187,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     grade: number,
     color: string,
     imageUri: string,
-    keyString: string,
     currentUser: string
   ) => {
     const date = Date.now();
-    prop.setCurSessionId(date);
+    prop.setCurSessionId(date + currentUser);
     await db()
-      .ref(`/users/${currentUser}/sessions/${date}`)
+      .ref(`/users/${currentUser}/sessions/${date + currentUser}`)
       .set({
         grade,
         color,
@@ -152,6 +215,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       color: newColor,
       imageUri: newImageUri,
     });
+
+    await updateLeaderboard(newGrade, newColor, newImageUri, currentUser);
   };
 
   const rStyle = useAnimatedStyle(() => {

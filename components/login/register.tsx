@@ -38,7 +38,7 @@ export const Register = () => {
     const sessionId = Date.now();
 
     await db()
-      .ref(`/users/${currentUser}/sessions/${sessionId}`)
+      .ref(`/users/${currentUser}/sessions/${sessionId + currentUser}`)
       .set({
         grade,
         color,

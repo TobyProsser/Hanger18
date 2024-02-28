@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, Button } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import auth from "@react-native-firebase/auth";
+import db from "@react-native-firebase/database";
+
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
 const profileImage =
@@ -11,10 +14,25 @@ interface IProfileProps {
 }
 const Profile = (prop: IProfileProps) => {
   const { onPress } = prop;
+  const [name, setName] = useState("null");
 
-  const onProfilePictureClick = () => {
-    onPress();
+  const getUsersName = async () => {
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      db()
+        .ref(`/users/${currentUser.uid}`)
+        .once("value")
+        .then((snapshot) => {
+          const userData = snapshot.val();
+          const name = userData.name;
+          setName(name);
+        });
+    }
   };
+
+  useEffect(() => {
+    getUsersName();
+  }, []);
 
   function handleClick() {
     prop.onPress();
@@ -27,7 +45,7 @@ const Profile = (prop: IProfileProps) => {
           <Image source={{ uri: profileImage }} style={styles.image} />
         </View>
         <Button onPress={handleClick} title="press me" />
-        <Text style={styles.nameText}>First Last, 24</Text>
+        <Text style={styles.nameText}>{name}, 24</Text>
         <View style={styles.line}></View>
         <View style={styles.rowStyle}>
           <Text style={styles.numbersText}>#157</Text>
