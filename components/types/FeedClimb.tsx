@@ -4,5 +4,5 @@ export interface FeedClimb {
   name?: string;
   grade?: number;
   color?: string;
-  imageUri?: string;
+  profilePic?: string;
 }

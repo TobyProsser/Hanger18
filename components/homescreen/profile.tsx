@@ -6,7 +6,7 @@ import db from "@react-native-firebase/database";
 
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
-const profileImage =
+const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
 interface IProfileProps {
@@ -15,6 +15,8 @@ interface IProfileProps {
 const Profile = (prop: IProfileProps) => {
   const { onPress } = prop;
   const [name, setName] = useState("null");
+  const [profileImage, setProfileImage] = useState("null");
+  const [lbIndex, setLBIndex] = useState(0);
 
   const getUsersName = async () => {
     const currentUser = auth().currentUser;
@@ -26,6 +28,24 @@ const Profile = (prop: IProfileProps) => {
           const userData = snapshot.val();
           const name = userData.name;
           setName(name);
+        });
+
+      db()
+        .ref(`/users/${currentUser.uid}/profileImage`)
+        .once("value")
+        .then((snapshot) => {
+          const data = snapshot.val();
+          const profileImage = data.profileImageUri;
+          setProfileImage(profileImage);
+        });
+
+      db()
+        .ref(`/users/${currentUser.uid}/lbIndex/`)
+        .once("value")
+        .then((snapshot) => {
+          const data = snapshot.val();
+          const templbIndex = data.lbIndex;
+          setLBIndex(templbIndex);
         });
     }
   };
@@ -41,14 +61,17 @@ const Profile = (prop: IProfileProps) => {
   return (
     <View style={styles.profileContainer}>
       <View style={{ flexDirection: "column", alignItems: "center" }}>
-        <View style={styles.profileImageContainer}>
+        <View
+          style={styles.profileImageContainer}
+          onTouchEnd={() => handleClick()}
+        >
           <Image source={{ uri: profileImage }} style={styles.image} />
         </View>
-        <Button onPress={handleClick} title="press me" />
+        <View style={{ height: 38 }} />
         <Text style={styles.nameText}>{name}, 24</Text>
         <View style={styles.line}></View>
         <View style={styles.rowStyle}>
-          <Text style={styles.numbersText}>#157</Text>
+          <Text style={styles.numbersText}>#{lbIndex}</Text>
           <Text style={styles.numbersText}>10/10</Text>
         </View>
         <Image source={{ uri: logo }} style={styles.logoImage} />

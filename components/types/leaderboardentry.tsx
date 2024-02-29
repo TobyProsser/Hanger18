@@ -3,4 +3,6 @@ export interface LeaderboardEntry {
   name: string;
   overallScore: number;
   key: string;
+  date: number;
+  profilePic: string;
 }

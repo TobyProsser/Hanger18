@@ -9,22 +9,31 @@ import {
   Pressable,
   Keyboard,
   Alert,
+  Image,
 } from "react-native";
 import { CTAButton } from "../elements/ctabutton";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as ImagePicker from "expo-image-picker";
 
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
+
+const profileImage =
+  "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
 export const Register = () => {
   const [name, setName] = useState<string | undefined>();
   const [email, setEmail] = useState<string | undefined>();
   const [password, setPassword] = useState<string | undefined>();
+  const [profileImageUri, setProfileImageUri] = useState<string | undefined>();
 
   const nav = useNavigation<NativeStackNavigationProp<any>>();
 
   const createProfile = async (response: any) => {
     db().ref(`/users/${response.user.uid}`).set({ name });
+    db()
+      .ref(`/users/${response.user.uid}/profileImage`)
+      .set({ profileImageUri });
     db().ref(`/users/${response.user.uid}/leaderboard`).set({ totalScore: 0 });
   };
 
@@ -72,6 +81,19 @@ export const Register = () => {
     }
   };
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImageUri(result.assets[0].uri);
+    }
+  };
+
   return (
     <Pressable style={styles.contentView} onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.contentView}>
@@ -101,6 +123,17 @@ export const Register = () => {
               onChangeText={setPassword}
               secureTextEntry
             />
+            <View
+              style={styles.profileImageContainer}
+              onTouchEnd={() => pickImage()}
+            >
+              <Image
+                source={{
+                  uri: profileImageUri ? profileImageUri : profileImage,
+                }}
+                style={styles.image}
+              />
+            </View>
           </View>
           <CTAButton
             title="Sign Up"
@@ -143,5 +176,26 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 6,
+  },
+  profileImageContainer: {
+    alignSelf: "center",
+    width: 150,
+    height: 150,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 100,
+    elevation: 5, // For shadow on Android
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    //padding: 10,
+    marginTop: 20,
+    top: 50,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    marginBottom: 10,
+    borderRadius: 100,
   },
 });

@@ -91,21 +91,20 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       .update({ leaderboard: Object.fromEntries(newLeaderboard) });
   };
 
-  const updateLeaderboard = async (
-    grades: number,
-    color: string,
-    imageUri: string,
-    currentUser: string
-  ) => {
+  const updateLeaderboard = async (grades: number, currentUser: string) => {
     const user = await db().ref(`/users/${currentUser}`).once("value");
     const userName = user.val().name as string;
-
+    //Get profileImage
+    const data = await db()
+      .ref(`/users/${currentUser}/profileImage`)
+      .once("value");
+    const profileImage = data.val().profileImageUri;
+    //Calculate total grade
     const totalGradePath = `/users/${currentUser}/leaderboard/`;
     const gradesSnapshot = await db().ref(totalGradePath).once("value");
     const totalGrades = (gradesSnapshot.val().totalScore as number) + grades;
     //Save new totalgrade to local user
     await db().ref(totalGradePath).update({ totalScore: totalGrades });
-
     const leaderboard = await db().ref(`/leaderboard`).once("value");
     let leaderboardCopy = { ...leaderboard.val() };
     let allValues: LeaderboardEntry[] = Object.values(leaderboardCopy);
@@ -115,23 +114,28 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     );
 
     if (leaderboardIndex > -1) {
-      console.log("OverallScore1 " + totalGrades + " " + allValues);
-
       allValues[leaderboardIndex] = {
         currentUser: currentUser,
         overallScore: totalGrades,
         name: userName,
-        key: Date.now + currentUser,
+        profilePic: profileImage,
+        date: Date.now(),
+        key: Date.now() + currentUser,
       };
 
       sortAndSave(allValues);
+
+      await db()
+        .ref(`/users/${currentUser}/lbIndex/`)
+        .update({ lbIndex: leaderboardIndex });
     } else {
-      console.log("OverallScore " + totalGrades + " " + allValues);
       allValues.push({
         currentUser: currentUser,
         overallScore: totalGrades,
         name: userName,
-        key: Date.now + currentUser,
+        profilePic: profileImage,
+        date: Date.now(),
+        key: Date.now() + currentUser,
       });
 
       sortAndSave(allValues);
@@ -209,14 +213,14 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     currentUser: string
   ) => {
     setClimbSubmitted(true);
-    console.log(newGrade + " " + newColor + " " + prop.sessionId);
+
     await db().ref(`/users/${currentUser}/sessions/${prop.sessionId}`).update({
       grade: newGrade,
       color: newColor,
       imageUri: newImageUri,
     });
 
-    await updateLeaderboard(newGrade, newColor, newImageUri, currentUser);
+    await updateLeaderboard(newGrade, currentUser);
   };
 
   const rStyle = useAnimatedStyle(() => {

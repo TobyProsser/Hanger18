@@ -30,7 +30,7 @@ const DropdownContenet = () => {
   const [feed, setFeed] = useState<FeedClimb[]>([]);
   const [limit, setLimit] = useState(10);
   const [imageUri, setImageUri] = useState("null");
-  const [curSessionId, setCurSessionId] = useState(Date.now);
+  const [curSessionId, setCurSessionId] = useState(Date.now());
   const flatListRef = React.useRef<FlatList>(null);
 
   const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
@@ -112,6 +112,7 @@ const DropdownContenet = () => {
                 justifyContent: "center",
                 transform: [{ translateY }],
                 borderRadius: 34,
+                backgroundColor: "white",
               }}
             >
               <TallClimbHolder

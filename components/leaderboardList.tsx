@@ -5,18 +5,18 @@ import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
 import db from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
-
+import auth from "@react-native-firebase/auth";
 const { width, height } = Dimensions.get("screen");
 
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
-const profileImage =
+const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
 const DATA = [...Array(30).keys()].map((_, i) => {
   return {
     key: Math.random().toString(36),
-    image: profileImage,
+    image: unsetProfileImage,
     name: "First Last",
     jobTitle: "#000",
     email: "v9, v8, v9, v7 ...",
@@ -39,22 +39,25 @@ const LeaderboardList = () => {
     snapshot: FirebaseDatabaseTypes.DataSnapshot
   ) => {
     if (snapshot.val()) {
-      const values: FeedClimb[] = Array.isArray(snapshot.val())
-        ? snapshot.val()
-        : Object.values(snapshot.val());
-      setLeaderboard(values);
+      const values: FeedClimb[] = snapshot.val();
+      if (values) {
+        setLeaderboard(values);
+      }
+    } else {
+      console.log("NO SNAPSHOT");
     }
   };
 
   useEffect(() => {
     const refPath = "/leaderboard";
     db().ref(refPath).on("value", onLeaderboardChange);
-    return () => db().ref(refPath).off("value", onLeaderboardChange);
+    //Causing error
+    //return () => db().ref(refPath).off("value", onLeaderboardChange);
   }, []);
 
   return (
-    <View style={{ padding: 20, zIndex: 1 }}>
-      <View>
+    <View style={{ padding: 20, zIndex: 1, flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <Animated.FlatList
           data={leaderboard}
           onScroll={Animated.event(
@@ -91,48 +94,74 @@ const LeaderboardList = () => {
               <Animated.View
                 style={[
                   styles.parentContainerStyle,
+                  { overflow: "hidden" },
                   //{ opacity, transform: [{ scale }] },
                 ]}
               >
                 <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "flex-start",
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    left: 15,
-                    gap: 15,
                   }}
                 >
-                  <View>
-                    <Image
-                      source={{ uri: item.imageUri }}
-                      style={{
-                        width: AVATAR_SIZE,
-                        height: AVATAR_SIZE,
-                        borderRadius: AVATAR_SIZE,
-                        marginRight: SPACING / 2,
-                      }}
-                    />
+                  <View
+                    style={{
+                      paddingTop: 10,
+                      paddingBottom: 10,
+                      flexDirection: "row",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                      left: 15,
+                      gap: 15,
+                    }}
+                  >
+                    <View>
+                      <Image
+                        source={{
+                          uri: item.profilePic
+                            ? item.profilePic
+                            : unsetProfileImage,
+                        }}
+                        style={{
+                          width: AVATAR_SIZE,
+                          height: AVATAR_SIZE,
+                          borderRadius: AVATAR_SIZE,
+                          marginRight: SPACING / 2,
+                        }}
+                      />
+                    </View>
+                    <View>
+                      <Text
+                        style={{
+                          fontSize: 22,
+                          fontWeight: "700",
+                          color: "white",
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    </View>
                   </View>
-                  <View>
+                  <View
+                    style={{
+                      width: 100,
+                      height: 60,
+                      backgroundColor: "pink",
+                      alignSelf: "flex-start",
+                      borderRadius: 18,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     <Text
                       style={{
-                        fontSize: 22,
-                        fontWeight: "700",
                         color: "white",
+                        fontSize: index < 999 ? 35 : 20,
+                        fontWeight: "700",
                       }}
                     >
-                      {item.name}
-                    </Text>
-                    <Text
-                      style={{ fontSize: 22, opacity: 0.7, color: "white" }}
-                    >
-                      {item.date}
-                    </Text>
-                    <Text
-                      style={{ fontSize: 22, opacity: 0.8, color: "#C1E3EE" }}
-                    >
-                      {item.color}
+                      {index + 1}
                     </Text>
                   </View>
                 </View>
@@ -157,7 +186,6 @@ const styles = StyleSheet.create({
   },
 
   parentContainerStyle: {
-    padding: SPACING,
     marginBottom: SPACING + 2.5,
     borderRadius: 18,
     backgroundColor: "#6aafdf",
