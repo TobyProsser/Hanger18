@@ -5,4 +5,5 @@ export interface FeedClimb {
   grade?: number;
   color?: string;
   profilePic?: string;
+  allGrades: number[];
 }

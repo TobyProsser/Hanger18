@@ -17,14 +17,14 @@ const Profile = (prop: IProfileProps) => {
   const [name, setName] = useState("null");
   const [profileImage, setProfileImage] = useState("null");
   const [lbIndex, setLBIndex] = useState(0);
+  const [climbsAmount, setClimbsAmount] = useState(0);
 
   const getUsersName = async () => {
     const currentUser = auth().currentUser;
     if (currentUser) {
       db()
         .ref(`/users/${currentUser.uid}`)
-        .once("value")
-        .then((snapshot) => {
+        .on("value", (snapshot) => {
           const userData = snapshot.val();
           const name = userData.name;
           setName(name);
@@ -32,26 +32,50 @@ const Profile = (prop: IProfileProps) => {
 
       db()
         .ref(`/users/${currentUser.uid}/profileImage`)
-        .once("value")
-        .then((snapshot) => {
+        .on("value", (snapshot) => {
           const data = snapshot.val();
           const profileImage = data.profileImageUri;
           setProfileImage(profileImage);
         });
 
       db()
-        .ref(`/users/${currentUser.uid}/lbIndex/`)
-        .once("value")
-        .then((snapshot) => {
+        .ref(`/users/${currentUser.uid}/lbIndex`)
+        .on("value", (snapshot) => {
           const data = snapshot.val();
-          const templbIndex = data.lbIndex;
-          setLBIndex(templbIndex);
+          if (data) {
+            const templbIndex = data.lbIndex;
+            setLBIndex(templbIndex);
+          } else {
+            console.log("The lbIndex path does not exist.");
+          }
+        });
+
+      db()
+        .ref(`/users/${currentUser.uid}/climbsAmount`)
+        .on("value", (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const tempClimbsAmount = data.climbsAmount;
+            setClimbsAmount(tempClimbsAmount);
+          } else {
+            console.log("The climbsAmount path does not exist.");
+          }
         });
     }
   };
 
   useEffect(() => {
     getUsersName();
+    // Cleanup function to remove the listeners when the component unmounts
+    return () => {
+      const currentUser = auth().currentUser;
+      if (currentUser) {
+        db().ref(`/users/${currentUser.uid}`).off();
+        db().ref(`/users/${currentUser.uid}/profileImage`).off();
+        db().ref(`/users/${currentUser.uid}/lbIndex`).off();
+        db().ref(`/users/${currentUser.uid}/climbsAmount`).off();
+      }
+    };
   }, []);
 
   function handleClick() {
@@ -71,8 +95,8 @@ const Profile = (prop: IProfileProps) => {
         <Text style={styles.nameText}>{name}, 24</Text>
         <View style={styles.line}></View>
         <View style={styles.rowStyle}>
-          <Text style={styles.numbersText}>#{lbIndex}</Text>
-          <Text style={styles.numbersText}>10/10</Text>
+          <Text style={styles.numbersText}>#{lbIndex + 1}</Text>
+          <Text style={styles.numbersText}>{climbsAmount}/10</Text>
         </View>
         <Image source={{ uri: logo }} style={styles.logoImage} />
       </View>
@@ -84,8 +108,8 @@ export default Profile;
 
 const styles = StyleSheet.create({
   rowStyle: {
-    left: -30,
-    width: 125,
+    left: -19,
+    width: 150,
     height: 40,
     flexDirection: "row",
     alignSelf: "center",

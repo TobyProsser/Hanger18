@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Dispatch } from "react";
 import {
   StatusBar,
   Text,
@@ -24,7 +24,6 @@ const CLIMB_HOLDER_WIDTH = SCREENWIDTH;
 const SPACING = 0;
 const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
 const leftKey = "left_spacer";
-
 //{ currentUser } in ()
 const DropdownContenet = () => {
   const [feed, setFeed] = useState<FeedClimb[]>([]);

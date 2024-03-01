@@ -6,6 +6,7 @@ import { StyleSheet, Text, View, Image, Animated } from "react-native";
 import db from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
 import auth from "@react-native-firebase/auth";
+import PlacerColorItem from "./elements/placercoloritem";
 const { width, height } = Dimensions.get("screen");
 
 const logo =
@@ -34,6 +35,8 @@ const LeaderboardList = () => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
 
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
+
+  //Changes color of the
 
   const onLeaderboardChange = (
     snapshot: FirebaseDatabaseTypes.DataSnapshot
@@ -94,29 +97,51 @@ const LeaderboardList = () => {
               <Animated.View
                 style={[
                   styles.parentContainerStyle,
-                  { overflow: "hidden" },
+                  { overflow: "hidden", height: 100 },
                   //{ opacity, transform: [{ scale }] },
                 ]}
               >
                 <View
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
                     alignItems: "center",
                   }}
                 >
                   <View
                     style={{
+                      top: -10,
+                      right: -10,
+                      alignSelf: "flex-end",
+                      alignContent: "flex-start",
+                      borderRadius: 18,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <PlacerColorItem index={index} />
+                  </View>
+
+                  <View
+                    style={{
+                      top: -55,
                       paddingTop: 10,
                       paddingBottom: 10,
                       flexDirection: "row",
                       justifyContent: "flex-start",
                       alignItems: "center",
-                      left: 15,
                       gap: 15,
                     }}
                   >
-                    <View>
+                    <View
+                      style={{
+                        shadowColor: "#000",
+                        shadowOffset: {
+                          width: 0,
+                          height: 2,
+                        },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 2,
+                      }}
+                    >
                       <Image
                         source={{
                           uri: item.profilePic
@@ -131,38 +156,28 @@ const LeaderboardList = () => {
                         }}
                       />
                     </View>
-                    <View>
-                      <Text
+                    <View style={{ flexDirection: "column" }}>
+                      <Text style={styles.nameText}>{item.name}</Text>
+                      <View style={styles.line}></View>
+                      <View
                         style={{
-                          fontSize: 22,
-                          fontWeight: "700",
-                          color: "white",
+                          top: 15,
+                          width: 200,
+                          height: 35,
+                          backgroundColor: "red",
                         }}
                       >
-                        {item.name}
-                      </Text>
+                        <Text
+                          style={{
+                            fontSize: 22,
+                            fontWeight: "100",
+                            color: "white",
+                          }}
+                        >
+                          {item.allGrades}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                  <View
-                    style={{
-                      width: 100,
-                      height: 60,
-                      backgroundColor: "pink",
-                      alignSelf: "flex-start",
-                      borderRadius: 18,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: index < 999 ? 35 : 20,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {index + 1}
-                    </Text>
                   </View>
                 </View>
               </Animated.View>
@@ -184,7 +199,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "center",
   },
-
+  nameText: {
+    fontSize: 25,
+    fontWeight: "300",
+    color: "white",
+  },
+  line: {
+    top: 5,
+    width: 100,
+    height: 1,
+    backgroundColor: "white",
+  },
   parentContainerStyle: {
     marginBottom: SPACING + 2.5,
     borderRadius: 18,

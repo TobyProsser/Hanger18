@@ -5,4 +5,5 @@ export interface LeaderboardEntry {
   key: string;
   date: number;
   profilePic: string;
+  grades: string;
 }

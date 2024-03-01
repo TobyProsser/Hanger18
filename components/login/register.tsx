@@ -35,6 +35,11 @@ export const Register = () => {
       .ref(`/users/${response.user.uid}/profileImage`)
       .set({ profileImageUri });
     db().ref(`/users/${response.user.uid}/leaderboard`).set({ totalScore: 0 });
+    db().ref(`/users/${response.user.uid}/lbIndex`).set({ lbIndex: 0 });
+    db()
+      .ref(`/users/${response.user.uid}/climbsAmount`)
+      .set({ climbsAmount: 0 });
+    db().ref(`/users/${response.user.uid}/allGrades`).set({ allGrades: "" });
   };
 
   const saveClimb = async (
@@ -104,9 +109,10 @@ export const Register = () => {
           <View style={styles.mainContent}>
             <TextInput
               style={styles.loginTextField}
-              placeholder="Name"
+              placeholder="Display Name"
               value={name}
               onChangeText={setName}
+              maxLength={8}
             />
             <TextInput
               style={styles.loginTextField}

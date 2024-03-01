@@ -26,7 +26,6 @@ import Animated, {
   useAnimatedReaction,
 } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
-import { FeedClimb } from "./types/feedclimb";
 import { LeaderboardEntry } from "./types/leaderboardentry";
 
 const CARD_HOLDER_HEIGHT = 350;
@@ -74,7 +73,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
 
-  const sortAndSave = async (allValues: LeaderboardEntry[]) => {
+  const sortAndSave = async (
+    allValues: LeaderboardEntry[],
+    userName: string,
+    currentUser: string
+  ) => {
     allValues.sort((a, b) => b.overallScore - a.overallScore);
 
     if (allValues.length > 3) {
@@ -89,9 +92,32 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     await db()
       .ref("/")
       .update({ leaderboard: Object.fromEntries(newLeaderboard) });
+
+    const { leaderboardIndex } = await findLeaderboardIndex(userName);
+
+    await db()
+      .ref(`/users/${currentUser}/lbIndex`)
+      .update({ lbIndex: leaderboardIndex });
   };
 
-  const updateLeaderboard = async (grades: number, currentUser: string) => {
+  const findLeaderboardIndex = async (userName: string) => {
+    const leaderboard = await db().ref(`/leaderboard`).once("value");
+    let leaderboardCopy = { ...leaderboard.val() };
+    let allValues: LeaderboardEntry[] = Object.values(leaderboardCopy);
+
+    //Find users place in leaderboard
+    const leaderboardIndex = allValues.findIndex(
+      (value) => value.name === userName
+    );
+
+    return { leaderboardIndex, allValues };
+  };
+
+  const updateLeaderboard = async (
+    newgrade: number,
+    allGrades: string,
+    currentUser: string
+  ) => {
     const user = await db().ref(`/users/${currentUser}`).once("value");
     const userName = user.val().name as string;
     //Get profileImage
@@ -102,18 +128,39 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     //Calculate total grade
     const totalGradePath = `/users/${currentUser}/leaderboard/`;
     const gradesSnapshot = await db().ref(totalGradePath).once("value");
-    const totalGrades = (gradesSnapshot.val().totalScore as number) + grades;
-    //Save new totalgrade to local user
-    await db().ref(totalGradePath).update({ totalScore: totalGrades });
-    const leaderboard = await db().ref(`/leaderboard`).once("value");
-    let leaderboardCopy = { ...leaderboard.val() };
-    let allValues: LeaderboardEntry[] = Object.values(leaderboardCopy);
+    const totalGrades = (gradesSnapshot.val().totalScore as number) + newgrade;
+    //get ClimbsAmount from database
+    const climbsAmountPath = `/users/${currentUser}/climbsAmount`;
+    let climbsAmount = 0;
 
-    const leaderboardIndex = allValues.findIndex(
-      (value) => value.name === userName
+    db()
+      .ref(climbsAmountPath)
+      .once("value")
+      .then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          climbsAmount = data.climbsAmount;
+        } else {
+          console.log("The climbsAmount path does not exist.");
+        }
+      })
+      .catch((error) => console.error("Error reading data: " + error));
+
+    //Update climbsAmount
+    await db()
+      .ref(climbsAmountPath)
+      .update({ climbsAmount: climbsAmount + 1 });
+
+    //Save new totalgrade to local user
+    console.log("updating score to leaderboard");
+    await db().ref(totalGradePath).update({ totalScore: totalGrades });
+
+    const { leaderboardIndex, allValues } = await findLeaderboardIndex(
+      userName
     );
 
     if (leaderboardIndex > -1) {
+      console.log("on leaderboard");
       allValues[leaderboardIndex] = {
         currentUser: currentUser,
         overallScore: totalGrades,
@@ -121,14 +168,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         profilePic: profileImage,
         date: Date.now(),
         key: Date.now() + currentUser,
+        grades: allGrades,
       };
 
-      sortAndSave(allValues);
-
-      await db()
-        .ref(`/users/${currentUser}/lbIndex/`)
-        .update({ lbIndex: leaderboardIndex });
+      sortAndSave(allValues, userName, currentUser);
     } else {
+      console.log("off leaderboard");
       allValues.push({
         currentUser: currentUser,
         overallScore: totalGrades,
@@ -136,9 +181,10 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         profilePic: profileImage,
         date: Date.now(),
         key: Date.now() + currentUser,
+        grades: allGrades,
       });
 
-      sortAndSave(allValues);
+      sortAndSave(allValues, userName, currentUser);
     }
   };
 
@@ -219,8 +265,28 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       color: newColor,
       imageUri: newImageUri,
     });
+    //get allGrades from database
+    const allGradesPath = `/users/${currentUser}/allGrades`;
+    const allGradesSnapshot = await db().ref(allGradesPath).once("value");
+    const allGrades = allGradesSnapshot.val().allGrades as string;
+    //Update allGrades
+    await db()
+      .ref(allGradesPath)
+      .once("value")
+      .then((snapshot) => {
+        let numbers = snapshot.val();
 
-    await updateLeaderboard(newGrade, currentUser);
+        // Add the new number to the end of the string
+        numbers = numbers + "V" + newGrade + " ";
+
+        // Update the list in Firebase
+        return db().ref(allGradesPath).update({ allGrades: numbers });
+      })
+      .then(async () => {
+        console.log("Number added.");
+        await updateLeaderboard(newGrade, allGrades, currentUser);
+      })
+      .catch((error) => console.error("Number could not be added: " + error));
   };
 
   const rStyle = useAnimatedStyle(() => {
