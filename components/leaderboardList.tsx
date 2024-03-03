@@ -35,6 +35,7 @@ const LeaderboardList = () => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
 
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
+  const [gradesText, setGradesText] = useState("");
 
   //Changes color of the
 
@@ -164,7 +165,6 @@ const LeaderboardList = () => {
                           top: 15,
                           width: 200,
                           height: 35,
-                          backgroundColor: "red",
                         }}
                       >
                         <Text

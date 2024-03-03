@@ -80,7 +80,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   ) => {
     allValues.sort((a, b) => b.overallScore - a.overallScore);
 
-    if (allValues.length > 3) {
+    //Change value to load more leaderboard values, implement lazy loading here
+    if (allValues.length > 20) {
       allValues.pop();
     }
 
@@ -88,6 +89,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       acc.set(index, cur);
       return acc;
     }, new Map<Number, LeaderboardEntry>());
+    console.log("new Leaderboard: " + newLeaderboard);
 
     await db()
       .ref("/")
@@ -95,6 +97,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
     const { leaderboardIndex } = await findLeaderboardIndex(userName);
 
+    console.log("lbIndex is:" + leaderboardIndex);
     await db()
       .ref(`/users/${currentUser}/lbIndex`)
       .update({ lbIndex: leaderboardIndex });
@@ -133,34 +136,34 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const climbsAmountPath = `/users/${currentUser}/climbsAmount`;
     let climbsAmount = 0;
 
-    db()
-      .ref(climbsAmountPath)
-      .once("value")
-      .then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          climbsAmount = data.climbsAmount;
-        } else {
-          console.log("The climbsAmount path does not exist.");
-        }
-      })
-      .catch((error) => console.error("Error reading data: " + error));
+    try {
+      const snapshot = await db().ref(climbsAmountPath).once("value");
+      const data = snapshot.val();
+      if (data) {
+        climbsAmount = data.climbsAmount;
+      } else {
+        console.log("The climbsAmount path does not exist.");
+      }
+    } catch (error) {
+      console.error("Error reading data: " + error);
+    }
 
-    //Update climbsAmount
+    console.log("climbs amount: " + climbsAmount);
+
+    // Update climbsAmount
     await db()
       .ref(climbsAmountPath)
       .update({ climbsAmount: climbsAmount + 1 });
 
     //Save new totalgrade to local user
-    console.log("updating score to leaderboard");
     await db().ref(totalGradePath).update({ totalScore: totalGrades });
 
     const { leaderboardIndex, allValues } = await findLeaderboardIndex(
       userName
     );
 
+    console.log("just before updating leaderboard allgrades: " + allGrades);
     if (leaderboardIndex > -1) {
-      console.log("on leaderboard");
       allValues[leaderboardIndex] = {
         currentUser: currentUser,
         overallScore: totalGrades,
@@ -168,12 +171,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         profilePic: profileImage,
         date: Date.now(),
         key: Date.now() + currentUser,
-        grades: allGrades,
+        allGrades: allGrades,
       };
 
       sortAndSave(allValues, userName, currentUser);
     } else {
-      console.log("off leaderboard");
       allValues.push({
         currentUser: currentUser,
         overallScore: totalGrades,
@@ -181,7 +183,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         profilePic: profileImage,
         date: Date.now(),
         key: Date.now() + currentUser,
-        grades: allGrades,
+        allGrades: allGrades,
       });
 
       sortAndSave(allValues, userName, currentUser);
@@ -268,7 +270,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     //get allGrades from database
     const allGradesPath = `/users/${currentUser}/allGrades`;
     const allGradesSnapshot = await db().ref(allGradesPath).once("value");
-    const allGrades = allGradesSnapshot.val().allGrades as string;
+    let allGrades = allGradesSnapshot.val().allGrades as string;
     //Update allGrades
     await db()
       .ref(allGradesPath)
@@ -277,13 +279,13 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         let numbers = snapshot.val();
 
         // Add the new number to the end of the string
-        numbers = numbers + "V" + newGrade + " ";
-
+        const newValue = allGrades + "V" + newGrade + " ";
+        allGrades = newValue;
+        console.log("newValue: " + newValue);
         // Update the list in Firebase
-        return db().ref(allGradesPath).update({ allGrades: numbers });
+        return db().ref(allGradesPath).update({ allGrades: newValue });
       })
       .then(async () => {
-        console.log("Number added.");
         await updateLeaderboard(newGrade, allGrades, currentUser);
       })
       .catch((error) => console.error("Number could not be added: " + error));

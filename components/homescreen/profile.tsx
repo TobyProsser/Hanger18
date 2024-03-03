@@ -18,6 +18,7 @@ const Profile = (prop: IProfileProps) => {
   const [profileImage, setProfileImage] = useState("null");
   const [lbIndex, setLBIndex] = useState(0);
   const [climbsAmount, setClimbsAmount] = useState(0);
+  const [allgrades, setAllgrades] = useState("");
 
   const getUsersName = async () => {
     const currentUser = auth().currentUser;
@@ -59,6 +60,18 @@ const Profile = (prop: IProfileProps) => {
             setClimbsAmount(tempClimbsAmount);
           } else {
             console.log("The climbsAmount path does not exist.");
+          }
+        });
+      db()
+        .ref(`/users/${currentUser.uid}/allGrades`)
+        .on("value", (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const tempAllGrades = data.allGrades;
+
+            setAllgrades(tempAllGrades);
+          } else {
+            console.log("The allGrades path does not exist.");
           }
         });
     }
