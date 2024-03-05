@@ -51,7 +51,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
     }
-  }, [curSessionId]); // Replace 'yourVariable' with the variable you're tracking
+  }, [curSessionId]);
 
   useEffect(() => {
     if (currentUser && !currentUser.includes("[")) {
@@ -65,14 +65,14 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
           .on("value", onClimbChange);
 
         console.log("ref path: " + refPath);
-        return () => db().ref(refPath).off("value", onClimbChange);
+        return db().ref(refPath).off("value", onClimbChange);
       } catch (e) {
         console.log(e.error);
       }
     } else {
       console.log("current User is undefined or equal to object Object");
     }
-  }, [limit]);
+  }, [currentUser]); //CHANGING THIS TO CURRENTUSER SHOULD MAKE THE SCREEN UPDATE WHEN THE CURRENT USER IS CHANGED, BUT IT RETURNS ERROR.
 
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
