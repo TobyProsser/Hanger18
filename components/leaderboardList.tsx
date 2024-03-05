@@ -14,16 +14,6 @@ const logo =
 const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
-const DATA = [...Array(30).keys()].map((_, i) => {
-  return {
-    key: Math.random().toString(36),
-    image: unsetProfileImage,
-    name: "First Last",
-    jobTitle: "#000",
-    email: "v9, v8, v9, v7 ...",
-  };
-});
-
 const SPACING = 10;
 const AVATAR_SIZE = 70;
 const ITEM_SIZE = AVATAR_SIZE + SPACING * 3;
@@ -31,7 +21,11 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING * 3;
 var opacity;
 var scale = 1;
 
-const LeaderboardList = () => {
+interface ILeaderbaordProps {
+  onPress: (currentUser) => void;
+}
+
+const LeaderboardList = (prop: ILeaderbaordProps) => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
 
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
@@ -60,7 +54,7 @@ const LeaderboardList = () => {
   }, []);
 
   return (
-    <View style={{ padding: 20, zIndex: 1, flex: 1 }}>
+    <View style={{ padding: 20, zIndex: 1, flex: 1, top: 350 }}>
       <View style={{ flex: 1 }}>
         <Animated.FlatList
           data={leaderboard}
@@ -96,6 +90,10 @@ const LeaderboardList = () => {
 
             return (
               <Animated.View
+                onTouchEnd={() => {
+                  console.log("pass value" + item.currentUser);
+                  prop.onPress(item.currentUser);
+                }}
                 style={[
                   styles.parentContainerStyle,
                   { overflow: "hidden", height: 100 },

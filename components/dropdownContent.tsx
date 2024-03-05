@@ -24,8 +24,12 @@ const CLIMB_HOLDER_WIDTH = SCREENWIDTH;
 const SPACING = 0;
 const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
 const leftKey = "left_spacer";
-//{ currentUser } in ()
-const DropdownContenet = () => {
+
+interface DropdownContentProps {
+  currentUser: string;
+}
+
+const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   const [feed, setFeed] = useState<FeedClimb[]>([]);
   const [limit, setLimit] = useState(10);
   const [imageUri, setImageUri] = useState("null");
@@ -50,15 +54,24 @@ const DropdownContenet = () => {
   }, [curSessionId]); // Replace 'yourVariable' with the variable you're tracking
 
   useEffect(() => {
-    const currentUser = auth().currentUser;
-    const refPath = `/users/${currentUser.uid}/sessions`;
-    db()
-      .ref(refPath)
-      .orderByKey()
-      .limitToLast(limit)
-      .on("value", onClimbChange);
+    if (currentUser && !currentUser.includes("[")) {
+      try {
+        console.log("content Current User: " + currentUser);
+        const refPath = `/users/${currentUser}/sessions`;
+        db()
+          .ref(refPath)
+          .orderByKey()
+          .limitToLast(limit)
+          .on("value", onClimbChange);
 
-    return () => db().ref(refPath).off("value", onClimbChange);
+        console.log("ref path: " + refPath);
+        return () => db().ref(refPath).off("value", onClimbChange);
+      } catch (e) {
+        console.log(e.error);
+      }
+    } else {
+      console.log("current User is undefined or equal to object Object");
+    }
   }, [limit]);
 
   const scrollX = React.useRef(new Animated.Value(0)).current;
@@ -111,7 +124,6 @@ const DropdownContenet = () => {
                 justifyContent: "center",
                 transform: [{ translateY }],
                 borderRadius: 34,
-                backgroundColor: "white",
               }}
             >
               <TallClimbHolder

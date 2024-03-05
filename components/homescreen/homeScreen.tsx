@@ -25,6 +25,7 @@ export default function HomeScreen() {
   const ref = useRef<BottomSheetRefProps>();
 
   const [activateFormTouch, setActivateFormTouch] = useState(false);
+  const [currentUser, setCurrentUser] = useState("");
   const toggleActivateFormTouch = useCallback(() => {
     "worklet";
 
@@ -32,7 +33,8 @@ export default function HomeScreen() {
   }, []);
 
   var isActive;
-  const onPress = useCallback(() => {
+  const onPress = useCallback((currentUser: string) => {
+    setCurrentUser(currentUser);
     isActive = ref?.current?.isActive();
     if (isActive) {
       ref?.current?.scrollTo(0);
@@ -42,6 +44,10 @@ export default function HomeScreen() {
       setActivateFormTouch(true);
     }
   }, []);
+
+  useEffect(() => {
+    console.log("UseEffect CurrentUser: " + currentUser);
+  }, [currentUser]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -61,14 +67,14 @@ export default function HomeScreen() {
           }}
         >
           <Profile onPress={onPress} />
-          <LeaderboardList />
+          <LeaderboardList onPress={onPress} />
           <DropdownForm
             ref={ref}
             onToggle={() => toggleActivateFormTouch}
             activateFormTouch={activateFormTouch}
           >
             <View style={{ top: 225 }}>
-              <DropdownContent />
+              <DropdownContent currentUser={currentUser} />
             </View>
           </DropdownForm>
         </View>

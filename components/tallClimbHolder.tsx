@@ -80,7 +80,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   ) => {
     allValues.sort((a, b) => b.overallScore - a.overallScore);
 
-    //Change value to load more leaderboard values, implement lazy loading here
     if (allValues.length > 20) {
       allValues.pop();
     }

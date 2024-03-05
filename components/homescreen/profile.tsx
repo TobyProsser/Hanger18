@@ -1,8 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, Button } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Button,
+  Dimensions,
+} from "react-native";
+import {
+  Gesture,
+  GestureDetector,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
+const { width: SCREENWIDTH } = Dimensions.get("screen");
 
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
@@ -10,7 +22,7 @@ const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
 interface IProfileProps {
-  onPress: () => void;
+  onPress: (currentUser) => void;
 }
 const Profile = (prop: IProfileProps) => {
   const { onPress } = prop;
@@ -91,13 +103,32 @@ const Profile = (prop: IProfileProps) => {
     };
   }, []);
 
-  function handleClick() {
-    prop.onPress();
-  }
+  const handleClick = async () => {
+    const currentUser = await auth().currentUser;
+    if (currentUser) {
+      prop.onPress(currentUser.uid);
+    }
+  };
 
   return (
     <View style={styles.profileContainer}>
-      <View style={{ flexDirection: "column", alignItems: "center" }}>
+      <View
+        style={{
+          width: SCREENWIDTH,
+        }}
+      >
+        <View
+          style={styles.button}
+          onTouchEnd={() => {
+            handleClick();
+          }}
+        >
+          <Text style={styles.text}>Add</Text>
+        </View>
+      </View>
+      <View
+        style={{ flexDirection: "column", alignItems: "center", top: -110 }}
+      >
         <View
           style={styles.profileImageContainer}
           onTouchEnd={() => handleClick()}
@@ -120,6 +151,24 @@ const Profile = (prop: IProfileProps) => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "#f4e24d",
+    borderRadius: 20,
+    width: 75,
+    height: 50,
+    marginTop: 60,
+    marginRight: 20,
+    alignSelf: "flex-end",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    color: "white",
+    fontSize: 20,
+    alignSelf: "center",
+    fontWeight: "700",
+    letterSpacing: 2,
+  },
   rowStyle: {
     left: -19,
     width: 150,
@@ -152,8 +201,9 @@ const styles = StyleSheet.create({
   profileContainer: {
     zIndex: 3,
     borderRadius: 35,
+    flex: 1,
     width: "100%",
-
+    position: "absolute",
     height: 396,
     backgroundColor: "#6aafdf",
     alignItems: "center",
