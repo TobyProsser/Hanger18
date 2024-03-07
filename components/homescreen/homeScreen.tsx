@@ -1,21 +1,10 @@
-import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { StyleSheet, View, Image, Dimensions } from "react-native";
 import Profile from "./profile";
 import LeaderboardList from "../leaderboardList";
 import DropdownForm, { BottomSheetRefProps } from "../dropdownForm";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState } from "react";
 import DropdownContent from "../dropdownContent";
-import Dropdown from "../dropList";
-import Animated, { useSharedValue } from "react-native-reanimated";
-import { NavigationContainer } from "@react-navigation/native";
 
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 const logo =
@@ -45,40 +34,20 @@ export default function HomeScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    console.log("UseEffect CurrentUser: " + currentUser);
-  }, [currentUser]);
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Image
-          source={{ uri: logo }}
-          style={StyleSheet.absoluteFillObject}
-          blurRadius={20}
-        />
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            flexDirection: "column",
-            backgroundColor: "#2a3641",
-            gap: -30,
-          }}
+    <GestureHandlerRootView style={styles.container}>
+      <View style={styles.wrapper}>
+        <Profile onPress={onPress} />
+        <LeaderboardList onPress={onPress} />
+        <DropdownForm
+          ref={ref}
+          onToggle={() => toggleActivateFormTouch}
+          activateFormTouch={activateFormTouch}
         >
-          <Profile onPress={onPress} />
-          <LeaderboardList onPress={onPress} />
-          <DropdownForm
-            ref={ref}
-            onToggle={() => toggleActivateFormTouch}
-            activateFormTouch={activateFormTouch}
-          >
-            <View style={{ top: 225 }}>
-              <DropdownContent currentUser={currentUser} />
-            </View>
-          </DropdownForm>
-        </View>
-        <StatusBar style="auto" />
+          <View style={styles.topAdjustment}>
+            <DropdownContent currentUser={currentUser} />
+          </View>
+        </DropdownForm>
       </View>
     </GestureHandlerRootView>
   );
@@ -88,4 +57,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  wrapper: {
+    flex: 1,
+    width: "100%",
+    flexDirection: "column",
+    backgroundColor: "#2a3641",
+    gap: -30,
+  },
+  topAdjustment: { top: 225 },
 });

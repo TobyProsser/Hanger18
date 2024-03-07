@@ -1,22 +1,11 @@
-import {
-  View,
-  useWindowDimensions,
-  StyleSheet,
-  Text,
-  Alert,
-} from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import Animated, {
-  Extrapolate,
-  interpolate,
   useAnimatedStyle,
-  useSharedValue,
   withSpring,
   withTiming,
-  useAnimatedReaction,
-  SharedValue,
 } from "react-native-reanimated";
 import Color from "color";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 type DropListItemType = {
   label: string;
@@ -37,18 +26,13 @@ const DropListItem: React.FC<DropListItemProps> = ({
   index,
   dropdownItemsCount,
   isExpanded,
-  grade,
   secondRow,
   setGrade,
   submitted,
 }) => {
-  const { width: windowWidth } = useWindowDimensions();
   const DropListItemHeight = 30;
   const DropListItemWidth = 75;
   const Margin = 2;
-
-  const fUllDropdiownHeight =
-    dropdownItemsCount * (DropListItemHeight + Margin);
 
   const collapsedTop = 0;
   const expandedTop = (DropListItemHeight + Margin) * index;
@@ -77,8 +61,6 @@ const DropListItem: React.FC<DropListItemProps> = ({
     };
   }, []);
 
-  const isHeader = index === 0;
-
   return (
     <Animated.View
       onTouchEnd={() => {
@@ -93,12 +75,11 @@ const DropListItem: React.FC<DropListItemProps> = ({
         }
       }}
       style={[
+        styles.animatedView,
         {
           zIndex: dropdownItemsCount - index,
-          position: "absolute",
           width: DropListItemWidth,
           height: DropListItemHeight,
-          borderRadius: 10,
         },
         rStyle,
       ]}
@@ -111,6 +92,10 @@ const DropListItem: React.FC<DropListItemProps> = ({
 };
 
 const styles = StyleSheet.create({
+  animatedView: {
+    position: "absolute",
+    borderRadius: 10,
+  },
   container: {
     flex: 1,
     justifyContent: "center",

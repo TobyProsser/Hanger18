@@ -5,12 +5,8 @@ import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
 import db from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
-import auth from "@react-native-firebase/auth";
 import PlacerColorItem from "./elements/placercoloritem";
-const { width, height } = Dimensions.get("screen");
 
-const logo =
-  "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
 const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
@@ -29,7 +25,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
 
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
-  const [gradesText, setGradesText] = useState("");
+  const [isScrolling, setIsScrolling] = useState(false);
 
   //Changes color of the
 
@@ -54,7 +50,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   }, []);
 
   return (
-    <View style={{ padding: 20, zIndex: 1, flex: 1, top: 350 }}>
+    <View style={styles.container}>
       <View style={{ flex: 1 }}>
         <Animated.FlatList
           data={leaderboard}
@@ -62,6 +58,8 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: true }
           )}
+          onScrollBeginDrag={() => setIsScrolling(true)}
+          onScrollEndDrag={() => setIsScrolling(false)}
           keyExtractor={(item) => item.key}
           contentContainerStyle={{
             padding: SPACING,
@@ -91,56 +89,22 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
             return (
               <Animated.View
                 onTouchEnd={() => {
-                  console.log("pass value" + item.currentUser);
-                  prop.onPress(item.currentUser);
+                  if (!isScrolling) {
+                    prop.onPress(item.currentUser);
+                  }
                 }}
                 style={[
                   styles.parentContainerStyle,
-                  { overflow: "hidden", height: 100 },
                   //{ opacity, transform: [{ scale }] },
                 ]}
               >
-                <View
-                  style={{
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      top: -10,
-                      right: -10,
-                      alignSelf: "flex-end",
-                      alignContent: "flex-start",
-                      borderRadius: 18,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
+                <View style={styles.centerAlign}>
+                  <View style={styles.placerItemContainter}>
                     <PlacerColorItem index={index} />
                   </View>
 
-                  <View
-                    style={{
-                      top: -55,
-                      paddingTop: 10,
-                      paddingBottom: 10,
-                      flexDirection: "row",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: 15,
-                    }}
-                  >
-                    <View
-                      style={{
-                        shadowColor: "#000",
-                        shadowOffset: {
-                          width: 0,
-                          height: 2,
-                        },
-                        shadowOpacity: 0.15,
-                        shadowRadius: 2,
-                      }}
-                    >
+                  <View style={styles.contentContainer}>
+                    <View style={styles.shadow}>
                       <Image
                         source={{
                           uri: item.profilePic
@@ -155,25 +119,11 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                         }}
                       />
                     </View>
-                    <View style={{ flexDirection: "column" }}>
+                    <View style={styles.column}>
                       <Text style={styles.nameText}>{item.name}</Text>
                       <View style={styles.line}></View>
-                      <View
-                        style={{
-                          top: 15,
-                          width: 200,
-                          height: 35,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 22,
-                            fontWeight: "100",
-                            color: "white",
-                          }}
-                        >
-                          {item.allGrades}
-                        </Text>
+                      <View style={styles.textSpacing}>
+                        <Text style={styles.text}>{item.allGrades}</Text>
                       </View>
                     </View>
                   </View>
@@ -190,6 +140,42 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
 export default LeaderboardList;
 
 const styles = StyleSheet.create({
+  textSpacing: {
+    top: 15,
+    width: 200,
+    height: 35,
+  },
+  text: { fontSize: 22, fontWeight: "100", color: "white" },
+  column: { flexDirection: "column" },
+  shadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+  },
+  contentContainer: {
+    top: -55,
+    paddingTop: 10,
+    paddingBottom: 10,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    gap: 15,
+  },
+  placerItemContainter: {
+    top: -10,
+    right: -10,
+    alignSelf: "flex-end",
+    alignContent: "flex-start",
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  centerAlign: { alignItems: "center" },
+  container: { padding: 20, zIndex: 1, flex: 1, top: 350 },
   rowStyle: {
     left: -30,
     width: 125,
@@ -219,7 +205,8 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.15,
     shadowRadius: 2,
-
+    overflow: "hidden",
+    height: 100,
     top: 50,
   },
 });

@@ -303,52 +303,27 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
             onTouchEnd={() => {
               pickImage();
             }}
-            style={{
-              alignItems: "center",
-              justifyContent: "flex-start",
-              width: 100,
-              height: 100,
-              borderRadius: 25,
-            }}
+            style={styles.emptyImageContainer}
           >
-            <Text style={{ fontSize: 50, top: 15 }}>+</Text>
+            <Text style={styles.emptyImageText}>+</Text>
           </View>
         ) : (
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "flex-start",
-            }}
-          >
+          <View style={styles.container}>
             <ImageBackground
               source={{
                 uri: prop.imageUri,
               }}
-              style={{
-                width: CARD_HOLDER_WIDTH,
-                height: CARD_HOLDER_HEIGHT,
-                borderRadius: 25,
-                overflow: "hidden",
-                bottom: 17,
-              }}
+              style={[
+                styles.backgroundImage,
+                {
+                  width: CARD_HOLDER_WIDTH,
+                  height: CARD_HOLDER_HEIGHT,
+                },
+              ]}
             >
-              <View
-                style={{
-                  top: 20,
-                  flex: 1,
-                  height: "100%",
-                  opacity: 0.95,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 80,
-                    left: 20,
-                  }}
-                >
-                  <View style={[styles.dropListContainer]}>
+              <View style={styles.rowContainer}>
+                <View style={styles.row}>
+                  <View>
                     <Dropdown
                       header={header}
                       options={options}
@@ -359,17 +334,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                       submitted={climbSubmitted}
                     />
                   </View>
-                  <Animated.View
-                    style={[
-                      styles.dropListContainer,
-                      { top: 32 },
-                      rStyle,
-                      {
-                        height: "100%",
-                        width: "100%",
-                      },
-                    ]}
-                  >
+                  <Animated.View style={[{ top: 32 }, rStyle]}>
                     <Dropdown
                       header={header1}
                       options={options1}
@@ -382,15 +347,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                   </Animated.View>
                 </View>
 
-                <View
-                  style={{
-                    width: 100,
-                    alignItems: "flex-start",
-                    alignSelf: "flex-end",
-                    height: "100%",
-                    right: 20,
-                  }}
-                >
+                <View style={styles.colorContainer}>
                   <ColorDropdown
                     header={header1}
                     options={options1}
@@ -414,24 +371,9 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                       );
                     }
                   }}
-                  style={{
-                    width: "100%",
-                    backgroundColor: "white",
-                    opacity: 0.7,
-                    height: 75,
-                    justifyContent: "center",
-                  }}
+                  style={styles.submitButton}
                 >
-                  <Text
-                    style={{
-                      fontSize: 30,
-                      color: "#6aafdf",
-                      alignSelf: "center",
-                      fontWeight: "600",
-                    }}
-                  >
-                    Submit Climb
-                  </Text>
+                  <Text style={styles.text}>Submit Climb</Text>
                 </View>
               ) : (
                 <View></View>
@@ -447,7 +389,47 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 export default TallClimbHolder;
 
 const styles = StyleSheet.create({
-  dropListContainer: {},
+  text: {
+    fontSize: 30,
+    color: "#6aafdf",
+    alignSelf: "center",
+    fontWeight: "600",
+  },
+  submitButton: {
+    width: "100%",
+    backgroundColor: "white",
+    opacity: 0.7,
+    height: 75,
+    justifyContent: "center",
+  },
+  colorContainer: {
+    width: 100,
+    alignItems: "flex-start",
+    alignSelf: "flex-end",
+    height: "100%",
+    right: 20,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 80,
+    left: 20,
+  },
+  rowContainer: {
+    top: 20,
+    flex: 1,
+    height: "100%",
+    opacity: 0.95,
+  },
+  backgroundImage: { borderRadius: 25, overflow: "hidden", bottom: 17 },
+  container: { flex: 1, alignItems: "center", justifyContent: "flex-start" },
+  emptyImageText: { fontSize: 50, top: 15 },
+  emptyImageContainer: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: 100,
+    height: 100,
+    borderRadius: 25,
+  },
   climbHolder: {
     top: 100,
     alignItems: "center",

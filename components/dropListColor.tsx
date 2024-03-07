@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { ColorDropListItem, DropListItemColorType } from "./dropListItemColor";
-import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 type DropListItemColorProps = {
   header: DropListItemColorType;

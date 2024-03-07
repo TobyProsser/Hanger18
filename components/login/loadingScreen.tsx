@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 import { View, Text, StyleSheet } from "react-native";
 
@@ -11,7 +11,7 @@ export const LoadingScreen = () => {
 
   function onAuthStateChanged(user: FirebaseAuthTypes.User | null) {
     if (user) {
-      nav.replace("Home");
+      nav.replace("Login");
     } else {
       nav.replace("Login");
     }

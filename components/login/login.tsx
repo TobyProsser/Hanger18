@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
-  Text,
   StyleSheet,
   TextInput,
   Pressable,
@@ -54,7 +53,7 @@ export const Login = () => {
             <Image source={{ uri: logo }} style={StyleSheet.absoluteFill} />
           </View>
           <View style={styles.mainContent} />
-          <View style={{ bottom: 250 }}>
+          <View style={styles.bottomAdjustment}>
             <TextInput
               style={styles.loginTextField}
               placeholder="Email"
@@ -84,6 +83,7 @@ export const Login = () => {
 };
 
 const styles = StyleSheet.create({
+  bottomAdjustment: { bottom: 250 },
   contentView: {
     flex: 1,
     backgroundColor: "white",

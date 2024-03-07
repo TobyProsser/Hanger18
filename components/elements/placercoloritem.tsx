@@ -1,11 +1,5 @@
-import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
-import React, { useEffect, useState } from "react";
-import { Dimensions } from "react-native";
-import { StyleSheet, Text, View, Image, Animated } from "react-native";
-
-import db from "@react-native-firebase/database";
-import auth from "@react-native-firebase/auth";
-const { width, height } = Dimensions.get("screen");
+import React from "react";
+import { StyleSheet, Text, Animated } from "react-native";
 
 const PlacerColorItem = ({ index }: { index: number }) => {
   // Create an animated value based on the index
@@ -19,32 +13,21 @@ const PlacerColorItem = ({ index }: { index: number }) => {
   });
   return (
     <Animated.View
-      style={{
-        backgroundColor,
-        width: 100,
-        height: 60,
-        alignSelf: "flex-end",
-        alignContent: "flex-start",
-        borderRadius: 18,
-        alignItems: "center",
-        justifyContent: "center",
-
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2,
+      style={[
+        styles.textHolder,
+        {
+          backgroundColor,
         },
-        shadowOpacity: 0.15,
-        shadowRadius: 2,
-      }}
+      ]}
     >
       {
         <Text
-          style={{
-            color: "white",
-            fontSize: index < 999 ? 35 : 20,
-            fontWeight: "700",
-          }}
+          style={[
+            styles.text,
+            {
+              fontSize: index < 999 ? 35 : 20,
+            },
+          ]}
         >
           {index + 1}
         </Text>
@@ -54,3 +37,24 @@ const PlacerColorItem = ({ index }: { index: number }) => {
 };
 
 export default PlacerColorItem;
+
+const styles = StyleSheet.create({
+  text: { color: "white", fontWeight: "700" },
+  textHolder: {
+    width: 100,
+    height: 60,
+    alignSelf: "flex-end",
+    alignContent: "flex-start",
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+  },
+});

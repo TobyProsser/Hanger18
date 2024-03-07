@@ -1,7 +1,7 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { Dispatch, SetStateAction } from "react";
+import { View } from "react-native";
 import { DropListItem, DropListItemType } from "./dropListItem";
-import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 type DropdownProps = {
   header: DropListItemType;

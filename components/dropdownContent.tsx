@@ -1,29 +1,14 @@
-import React, { useEffect, useState, Dispatch } from "react";
-import {
-  StatusBar,
-  Text,
-  View,
-  StyleSheet,
-  FlatList,
-  Image,
-  Dimensions,
-  Animated,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, FlatList, Dimensions, Animated, StyleSheet } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
-import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 
 const { height: SCREENHEIGHT, width: SCREENWIDTH } = Dimensions.get("screen");
 
 const CLIMB_HOLDER_HIEGHT = 450;
 const CLIMB_HOLDER_WIDTH = SCREENWIDTH;
-const SPACING = 0;
-const SPACER_ITEM_SIZE = CLIMB_HOLDER_WIDTH * 0.25;
-const leftKey = "left_spacer";
 
 interface DropdownContentProps {
   currentUser: string;
@@ -76,15 +61,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
 
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
-    <View
-      style={{
-        //top: SCREENHEIGHT - CLIMB_HOLDER_HIEGHT * 1.5,
-        flex: 1,
-        alignSelf: "center",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <View style={styles.container}>
       <Animated.FlatList
         ref={flatListRef}
         showsHorizontalScrollIndicator={false}
@@ -117,14 +94,14 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
           });
           return (
             <Animated.View
-              style={{
-                width: CLIMB_HOLDER_WIDTH,
-                height: CLIMB_HOLDER_HIEGHT,
-                alignItems: "center",
-                justifyContent: "center",
-                transform: [{ translateY }],
-                borderRadius: 34,
-              }}
+              style={[
+                styles.animatedView,
+                {
+                  width: CLIMB_HOLDER_WIDTH,
+                  height: CLIMB_HOLDER_HIEGHT,
+                  transform: [{ translateY }],
+                },
+              ]}
             >
               <TallClimbHolder
                 imageUri={item.imageUri}
@@ -145,3 +122,17 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
 };
 
 export default DropdownContenet;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  animatedView: {
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 34,
+  },
+});

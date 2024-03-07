@@ -6,4 +6,5 @@ export interface FeedClimb {
   color?: string;
   profilePic?: string;
   allGrades: string;
+  currentUser: string;
 }

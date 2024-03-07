@@ -1,23 +1,11 @@
-import {
-  View,
-  useWindowDimensions,
-  StyleSheet,
-  Text,
-  Alert,
-} from "react-native";
+import { View, StyleSheet } from "react-native";
 import Animated, {
-  Extrapolate,
-  interpolate,
   useAnimatedStyle,
-  useSharedValue,
   withSpring,
   withTiming,
-  useAnimatedReaction,
-  AnimatedStyle,
-  SharedValue,
 } from "react-native-reanimated";
 import Color from "color";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 type DropListItemColorType = {
   label: string;
@@ -33,7 +21,6 @@ type DropListItemColorProps = DropListItemColorType & {
 };
 
 const ColorDropListItem: React.FC<DropListItemColorProps> = ({
-  label,
   index,
   dropdownItemsCount,
   isExpanded,
@@ -41,15 +28,9 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   getColor,
   submitted,
 }) => {
-  const { width: windowWidth } = useWindowDimensions();
   const DropListItemHeight = 50;
   const DropListItemWidth = 100;
   const Margin = 2;
-
-  const selectedColor = useSharedValue("red");
-
-  const fUllDropdiownHeight =
-    dropdownItemsCount * (DropListItemHeight + Margin);
 
   const collapsedTop = 0;
   const expandedTop = (DropListItemHeight + Margin) * index;
@@ -117,36 +98,24 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
         }
       }}
       style={[
+        styles.animatedView,
         {
           zIndex: dropdownItemsCount - index,
-          position: "absolute",
+
           width: DropListItemWidth,
           height: DropListItemHeight,
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 25,
         },
         rStyle,
       ]}
     >
-      <View
-        style={{
-          width: 80,
-          height: 30,
-          borderRadius: 25,
-          backgroundColor: "#412A2A",
-          alignItems: "center",
-          justifyContent: "center",
-          alignSelf: "center",
-        }}
-      >
+      <View style={styles.innerOval}>
         <Animated.View
-          style={{
-            width: 75,
-            height: 25,
-            borderRadius: 25,
-            backgroundColor: index == 0 ? getColor : returnColorString(index),
-          }}
+          style={[
+            styles.innerAnimatedView,
+            {
+              backgroundColor: index == 0 ? getColor : returnColorString(index),
+            },
+          ]}
         />
       </View>
     </Animated.View>
@@ -154,6 +123,26 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
 };
 
 const styles = StyleSheet.create({
+  innerAnimatedView: {
+    width: 75,
+    height: 25,
+    borderRadius: 25,
+  },
+  innerOval: {
+    width: 80,
+    height: 30,
+    borderRadius: 25,
+    backgroundColor: "#412A2A",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+  animatedView: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 25,
+  },
   container: {
     flex: 1,
     justifyContent: "center",

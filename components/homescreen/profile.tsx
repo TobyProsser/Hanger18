@@ -1,36 +1,20 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Button,
-  Dimensions,
-} from "react-native";
-import {
-  Gesture,
-  GestureDetector,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 const { width: SCREENWIDTH } = Dimensions.get("screen");
 
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
-const unsetProfileImage =
-  "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
 interface IProfileProps {
   onPress: (currentUser) => void;
 }
 const Profile = (prop: IProfileProps) => {
-  const { onPress } = prop;
   const [name, setName] = useState("null");
   const [profileImage, setProfileImage] = useState("null");
   const [lbIndex, setLBIndex] = useState(0);
   const [climbsAmount, setClimbsAmount] = useState(0);
-  const [allgrades, setAllgrades] = useState("");
 
   const getUsersName = async () => {
     const currentUser = auth().currentUser;
@@ -74,18 +58,6 @@ const Profile = (prop: IProfileProps) => {
             console.log("The climbsAmount path does not exist.");
           }
         });
-      db()
-        .ref(`/users/${currentUser.uid}/allGrades`)
-        .on("value", (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            const tempAllGrades = data.allGrades;
-
-            setAllgrades(tempAllGrades);
-          } else {
-            console.log("The allGrades path does not exist.");
-          }
-        });
     }
   };
 
@@ -126,16 +98,14 @@ const Profile = (prop: IProfileProps) => {
           <Text style={styles.text}>Add</Text>
         </View>
       </View>
-      <View
-        style={{ flexDirection: "column", alignItems: "center", top: -110 }}
-      >
+      <View style={styles.column}>
         <View
           style={styles.profileImageContainer}
           onTouchEnd={() => handleClick()}
         >
           <Image source={{ uri: profileImage }} style={styles.image} />
         </View>
-        <View style={{ height: 38 }} />
+        <View style={styles.heightAdjustment} />
         <Text style={styles.nameText}>{name}, 24</Text>
         <View style={styles.line}></View>
         <View style={styles.rowStyle}>
@@ -151,6 +121,8 @@ const Profile = (prop: IProfileProps) => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  heightAdjustment: { height: 38 },
+  column: { flexDirection: "column", alignItems: "center", top: -110 },
   button: {
     backgroundColor: "#f4e24d",
     borderRadius: 20,
