@@ -6,4 +6,5 @@ export interface LeaderboardEntry {
   date: number;
   profilePic: string;
   allGrades: string;
+  climbingGym: string;
 }

@@ -6,6 +6,9 @@ import {
   Image,
   ImageBackground,
   Button,
+  PermissionsAndroid,
+  Permission,
+  Platform,
 } from "react-native";
 import Color from "color";
 import ColorSelect from "./colorSelect";
@@ -61,6 +64,7 @@ interface ITallClimbHolderProps {
   cardWidth: number;
   sessionId: number;
   setCurSessionId: Dispatch<any>;
+  isUsersClimbs: boolean;
 }
 
 const TallClimbHolder = (prop: ITallClimbHolderProps) => {
@@ -68,10 +72,82 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [color1, setColor1] = useState(prop.color ? prop.color : "null");
   const isGradeExpanded = useSharedValue(false);
   const isColorExpanded = useSharedValue(false);
-
+  const [cameraPermission, setCameraPermission] = useState(null);
+  const [galleryPermission, setGalleryPermission] = useState(null);
+  const [climbingGym, setClimbingGym] = useState(null);
   const [header, setHeader] = useState({ label: "V#" });
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
+
+  function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  const calculateDistance = async (lat1, lon1, lat2, lon2) => {
+    // Implementation of Haversine formula
+    const R = 6371; // Earth's radius in kilometers
+
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) *
+        Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c; // Distance in kilometers
+    return distance;
+  };
+
+  const findClimbingGym = async (result) => {
+    const userLatitude = result.location[0]; // Get user's latitude
+    const userLongitude = result.location[1]; // Get user's longitude
+
+    // Find the closest business location
+    let closestBusiness = null;
+    let minDistance = Infinity;
+
+    businessLocations.forEach(async (location) => {
+      const distance = calculateDistance(
+        userLatitude,
+        userLongitude,
+        location.latitude,
+        location.longitude
+      );
+
+      const dist = await distance;
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestBusiness = location;
+      }
+    });
+
+    console.log("Closest business:", closestBusiness.name);
+    console.log("Distance:", minDistance, "meters");
+    await setClimbingGym(closestBusiness.name);
+  };
+
+  const requestPermissions = async () => {
+    try {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log("status lib", status);
+      setGalleryPermission(status === "granted");
+    } catch (error) {
+      console.log("error", error);
+    }
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      console.log("status camera", status);
+      setCameraPermission(status === "granted");
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
   const sortAndSave = async (
     allValues: LeaderboardEntry[],
@@ -88,15 +164,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       acc.set(index, cur);
       return acc;
     }, new Map<Number, LeaderboardEntry>());
-    console.log("new Leaderboard: " + newLeaderboard);
 
     await db()
       .ref("/")
       .update({ leaderboard: Object.fromEntries(newLeaderboard) });
 
     const { leaderboardIndex } = await findLeaderboardIndex(userName);
-
-    console.log("lbIndex is:" + leaderboardIndex);
     await db()
       .ref(`/users/${currentUser}/lbIndex`)
       .update({ lbIndex: leaderboardIndex });
@@ -147,8 +220,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.error("Error reading data: " + error);
     }
 
-    console.log("climbs amount: " + climbsAmount);
-
     // Update climbsAmount
     await db()
       .ref(climbsAmountPath)
@@ -160,8 +231,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const { leaderboardIndex, allValues } = await findLeaderboardIndex(
       userName
     );
-
-    console.log("just before updating leaderboard allgrades: " + allGrades);
     if (leaderboardIndex > -1) {
       allValues[leaderboardIndex] = {
         currentUser: currentUser,
@@ -171,6 +240,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         date: Date.now(),
         key: Date.now() + currentUser,
         allGrades: allGrades,
+        climbingGym: climbingGym,
       };
 
       sortAndSave(allValues, userName, currentUser);
@@ -183,6 +253,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         date: Date.now(),
         key: Date.now() + currentUser,
         allGrades: allGrades,
+        climbingGym: climbingGym,
       });
 
       sortAndSave(allValues, userName, currentUser);
@@ -200,7 +271,29 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }
   };
 
+  const takeImage = async () => {
+    if (!cameraPermission) {
+      requestPermissions();
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    }).then(async (response) => {
+      if (!response.canceled) {
+        prop.setImageUri(response.assets[0].uri);
+        await findClimbingGym(result);
+        submitClimb(-1, "null", response.assets[0].uri);
+      }
+    });
+  };
+
   const pickImage = async () => {
+    if (!galleryPermission) {
+      requestPermissions();
+    }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -280,7 +373,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         // Add the new number to the end of the string
         const newValue = allGrades + "V" + newGrade + " ";
         allGrades = newValue;
-        console.log("newValue: " + newValue);
         // Update the list in Firebase
         return db().ref(allGradesPath).update({ allGrades: newValue });
       })
@@ -299,14 +391,18 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     <View style={[styles.climbHolder, { width: prop.cardWidth }]}>
       <View>
         {!prop.imageUri || prop.imageUri == "null" ? (
-          <View
-            onTouchEnd={() => {
-              pickImage();
-            }}
-            style={styles.emptyImageContainer}
-          >
-            <Text style={styles.emptyImageText}>+</Text>
-          </View>
+          prop.isUsersClimbs ? (
+            <View
+              onTouchEnd={() => {
+                takeImage();
+              }}
+              style={styles.emptyImageContainer}
+            >
+              <Text style={styles.emptyImageText}>+</Text>
+            </View>
+          ) : (
+            <View />
+          )
         ) : (
           <View style={styles.container}>
             <ImageBackground

@@ -7,4 +7,5 @@ export interface FeedClimb {
   profilePic?: string;
   allGrades: string;
   currentUser: string;
+  climbingGym: string;
 }

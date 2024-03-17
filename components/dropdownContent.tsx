@@ -4,6 +4,7 @@ import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
 import db from "@react-native-firebase/database";
+import auth from "@react-native-firebase/auth";
 
 const { height: SCREENHEIGHT, width: SCREENWIDTH } = Dimensions.get("screen");
 
@@ -19,6 +20,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   const [limit, setLimit] = useState(10);
   const [imageUri, setImageUri] = useState("null");
   const [curSessionId, setCurSessionId] = useState(Date.now());
+  const [isUsersClimbs, setIsUsersClimbs] = useState(false);
   const flatListRef = React.useRef<FlatList>(null);
 
   const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
@@ -38,10 +40,14 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
     }
   }, [curSessionId]);
 
+  const checkIfCurrentUser = async () => {
+    const loggedInUser = await auth().currentUser;
+    setIsUsersClimbs(loggedInUser.uid == currentUser);
+  };
+
   useEffect(() => {
     if (currentUser && !currentUser.includes("[")) {
       try {
-        console.log("content Current User: " + currentUser);
         const refPath = `/users/${currentUser}/sessions`;
         db()
           .ref(refPath)
@@ -49,10 +55,10 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
           .limitToLast(limit)
           .on("value", onClimbChange);
 
-        console.log("ref path: " + refPath);
+        checkIfCurrentUser();
         return db().ref(refPath).off("value", onClimbChange);
       } catch (e) {
-        console.log(e.error);
+        console.log("Current User in dropdown content error: " + e.error);
       }
     } else {
       console.log("current User is undefined or equal to object Object");
@@ -112,6 +118,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
                 key={item.key}
                 sessionId={curSessionId}
                 setCurSessionId={setCurSessionId}
+                isUsersClimbs={isUsersClimbs}
               />
             </Animated.View>
           );
