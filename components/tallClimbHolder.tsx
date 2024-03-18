@@ -16,6 +16,10 @@ import Dropdown from "./dropList";
 import ColorDropdown from "./dropListColor";
 import { GestureDetector } from "react-native-gesture-handler";
 
+import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
+
+import businessLocations from "./data/climbgymlocations";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 
@@ -74,6 +78,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const isColorExpanded = useSharedValue(false);
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
+  const [locationPermission, setLocationPermission] = useState(null);
   const [climbingGym, setClimbingGym] = useState(null);
   const [header, setHeader] = useState({ label: "V#" });
 
@@ -100,35 +105,41 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const distance = R * c; // Distance in kilometers
+    console.log("distance: " + distance);
     return distance;
   };
 
-  const findClimbingGym = async (result) => {
-    const userLatitude = result.location[0]; // Get user's latitude
-    const userLongitude = result.location[1]; // Get user's longitude
+  const findClimbingGym = async () => {
+    const location = await Location.getCurrentPositionAsync({});
+    console.log("User location:", location.coords);
+    if (location) {
+      // Find the closest business location
+      let closestBusiness = null;
+      let minDistance = Infinity;
 
-    // Find the closest business location
-    let closestBusiness = null;
-    let minDistance = Infinity;
+      const userLatitude = location.coords.latitude; // Get user's latitude
+      const userLongitude = location.coords.longitude; // Get user's longitude
 
-    businessLocations.forEach(async (location) => {
-      const distance = calculateDistance(
-        userLatitude,
-        userLongitude,
-        location.latitude,
-        location.longitude
-      );
+      for (const gym of businessLocations) {
+        const distance = await calculateDistance(
+          userLatitude,
+          userLongitude,
+          gym.latitude,
+          gym.longitude
+        );
 
-      const dist = await distance;
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestBusiness = location;
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestBusiness = gym;
+          console.log(gym);
+        }
       }
-    });
 
-    console.log("Closest business:", closestBusiness.name);
-    console.log("Distance:", minDistance, "meters");
-    await setClimbingGym(closestBusiness.name);
+      console.log(userLatitude + ", " + userLongitude);
+      console.log("Closest business:", closestBusiness.name);
+      console.log("Distance:", minDistance, "meters");
+      await setClimbingGym(closestBusiness.name);
+    }
   };
 
   const requestPermissions = async () => {
@@ -144,6 +155,16 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       console.log("status camera", status);
       setCameraPermission(status === "granted");
+    } catch (error) {
+      console.log("error", error);
+    }
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status == "granted") {
+        console.log("status location", status);
+        setLocationPermission(status === "granted");
+      }
     } catch (error) {
       console.log("error", error);
     }
@@ -284,7 +305,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }).then(async (response) => {
       if (!response.canceled) {
         prop.setImageUri(response.assets[0].uri);
-        await findClimbingGym(result);
+        await findClimbingGym();
         submitClimb(-1, "null", response.assets[0].uri);
       }
     });
@@ -358,6 +379,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       grade: newGrade,
       color: newColor,
       imageUri: newImageUri,
+      climbingGym: climbingGym,
     });
     //get allGrades from database
     const allGradesPath = `/users/${currentUser}/allGrades`;

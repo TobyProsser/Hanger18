@@ -3,18 +3,34 @@ import Profile from "./profile";
 import LeaderboardList from "../leaderboardList";
 import DropdownForm, { BottomSheetRefProps } from "../dropdownForm";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import DropdownContent from "../dropdownContent";
+import DropdownLocation from "../dropListLocation";
+import businessLocations from "../data/climbgymlocations";
+import { useSharedValue } from "react-native-reanimated";
 
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
 
+// Create options dynamically based on businessLocations
+const options = businessLocations.map((location) => ({
+  label: location.name,
+}));
 export default function HomeScreen() {
   const ref = useRef<BottomSheetRefProps>();
 
+  const isLocationExpanded = useSharedValue(false);
   const [activateFormTouch, setActivateFormTouch] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+
+  const [header, setHeader] = useState({ label: "Location" });
+
+  useEffect(() => {
+    setHeader({ label: selectedLocation });
+  }, [selectedLocation]);
+
   const toggleActivateFormTouch = useCallback(() => {
     "worklet";
 
@@ -38,6 +54,7 @@ export default function HomeScreen() {
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.wrapper}>
         <Profile onPress={onPress} />
+
         <LeaderboardList onPress={onPress} />
         <DropdownForm
           ref={ref}
@@ -48,6 +65,27 @@ export default function HomeScreen() {
             <DropdownContent currentUser={currentUser} />
           </View>
         </DropdownForm>
+        <View
+          style={{
+            position: "absolute",
+            top: 396 + 20,
+            right: 20,
+            height: 50,
+            width: 175,
+            borderRadius: 20,
+            backgroundColor: "blue",
+            alignSelf: "flex-end",
+            zIndex: 5,
+          }}
+        >
+          <DropdownLocation
+            header={header}
+            options={options}
+            isExpanded={isLocationExpanded}
+            selectedLocation={selectedLocation}
+            setSelectedLocation={setSelectedLocation}
+          />
+        </View>
       </View>
     </GestureHandlerRootView>
   );

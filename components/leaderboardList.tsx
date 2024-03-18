@@ -207,6 +207,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     overflow: "hidden",
     height: 100,
-    top: 50,
+    top: 105,
   },
 });
