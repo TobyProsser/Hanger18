@@ -6,6 +6,7 @@ import { StyleSheet, Text, View, Image, Animated } from "react-native";
 import db from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
 import PlacerColorItem from "./elements/placercoloritem";
+import { useLocationContext } from "./context/locationcontext";
 //import LocationContext from "./context/locationcontext";
 
 const unsetProfileImage =
@@ -28,7 +29,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
   const [isScrolling, setIsScrolling] = useState(false);
 
-  //const locationContextValue = useContext(LocationContext);
+  const { selectedLocation, setSelectedLocation } = useLocationContext();
 
   //Changes color of the
 
@@ -46,13 +47,12 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
     }
   };
 
-  const locationContextValue = "";
   useEffect(() => {
-    const refPath = `/leaderboards/${locationContextValue}/leaderboard`;
+    const refPath = `/leaderboards/${selectedLocation}/leaderboard`;
     db().ref(refPath).on("value", onLeaderboardChange);
     //Causing error
     //return () => db().ref(refPath).off("value", onLeaderboardChange);
-  }, [locationContextValue]);
+  }, [selectedLocation]);
 
   return (
     <View style={styles.container}>
@@ -180,7 +180,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   centerAlign: { alignItems: "center" },
-  container: { padding: 20, zIndex: 1, flex: 1, top: 350 },
+  container: {
+    padding: 20,
+    zIndex: 1,
+    flex: 1,
+    top: 350,
+  },
   rowStyle: {
     left: -30,
     width: 125,
