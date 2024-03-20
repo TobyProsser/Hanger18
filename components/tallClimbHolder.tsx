@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch } from "react";
+import React, { useState, useEffect, Dispatch, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -34,7 +34,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
 import { LeaderboardEntry } from "./types/leaderboardentry";
-
+import { useLocationContext } from "./context/locationcontext";
 const CARD_HOLDER_HEIGHT = 350;
 const CARD_HOLDER_WIDTH = 300;
 //https://runwildmychild.com/wp-content/uploads/2022/09/Indoor-Rock-Climbing-for-Kids-Climbing-Wall.jpg
@@ -79,10 +79,17 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
   const [locationPermission, setLocationPermission] = useState(null);
-  const [climbingGym, setClimbingGym] = useState(null);
+  //const [climbingGym, setClimbingGym] = useState("");
+  const climbingGym = useSharedValue("");
   const [header, setHeader] = useState({ label: "V#" });
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
+
+  const { selectedLocation, setSelectedLocation } = useLocationContext();
+
+  useEffect(() => {
+    console.log("Use effect climbing gym: " + climbingGym.value);
+  }, [climbingGym]);
 
   function deg2rad(deg) {
     return deg * (Math.PI / 180);
@@ -138,7 +145,10 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log(userLatitude + ", " + userLongitude);
       console.log("Closest business:", closestBusiness.name);
       console.log("Distance:", minDistance, "meters");
-      await setClimbingGym(closestBusiness.name);
+
+      return closestBusiness.name;
+    } else {
+      return "No-Business-Found";
     }
   };
 
@@ -187,17 +197,19 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }, new Map<Number, LeaderboardEntry>());
 
     await db()
-      .ref("/")
+      .ref(`/leaderboards/${selectedLocation}/`)
       .update({ leaderboard: Object.fromEntries(newLeaderboard) });
 
     const { leaderboardIndex } = await findLeaderboardIndex(userName);
     await db()
-      .ref(`/users/${currentUser}/lbIndex`)
+      .ref(`/users/${currentUser}/${selectedLocation}/lbIndex`)
       .update({ lbIndex: leaderboardIndex });
   };
 
   const findLeaderboardIndex = async (userName: string) => {
-    const leaderboard = await db().ref(`/leaderboard`).once("value");
+    const leaderboard = await db()
+      .ref(`leaderboards/${selectedLocation}/leaderboard`)
+      .once("value");
     let leaderboardCopy = { ...leaderboard.val() };
     let allValues: LeaderboardEntry[] = Object.values(leaderboardCopy);
 
@@ -222,11 +234,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       .once("value");
     const profileImage = data.val().profileImageUri;
     //Calculate total grade
-    const totalGradePath = `/users/${currentUser}/leaderboard/`;
+    const totalGradePath = `/users/${currentUser}/${selectedLocation}/leaderboard/`;
     const gradesSnapshot = await db().ref(totalGradePath).once("value");
     const totalGrades = (gradesSnapshot.val().totalScore as number) + newgrade;
     //get ClimbsAmount from database
-    const climbsAmountPath = `/users/${currentUser}/climbsAmount`;
+    const climbsAmountPath = `/users/${currentUser}/${selectedLocation}/climbsAmount`;
     let climbsAmount = 0;
 
     try {
@@ -261,7 +273,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         date: Date.now(),
         key: Date.now() + currentUser,
         allGrades: allGrades,
-        climbingGym: climbingGym,
+        climbingGym: selectedLocation,
       };
 
       sortAndSave(allValues, userName, currentUser);
@@ -274,7 +286,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         date: Date.now(),
         key: Date.now() + currentUser,
         allGrades: allGrades,
-        climbingGym: climbingGym,
+        climbingGym: selectedLocation,
       });
 
       sortAndSave(allValues, userName, currentUser);
@@ -284,11 +296,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const submitClimb = async (
     grade: number,
     color: string,
-    imageUri: string
+    imageUri: string,
+    gym: string
   ) => {
     const currentUser = auth().currentUser;
     if (currentUser) {
-      await saveClimb(grade, color, imageUri, currentUser.uid);
+      await saveClimb(gym, grade, color, imageUri, currentUser.uid);
     }
   };
 
@@ -305,8 +318,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }).then(async (response) => {
       if (!response.canceled) {
         prop.setImageUri(response.assets[0].uri);
-        await findClimbingGym();
-        submitClimb(-1, "null", response.assets[0].uri);
+        const gym = await findClimbingGym();
+        climbingGym.value = gym;
+        setSelectedLocation(gym);
+        console.log("awaited for: " + gym);
+        submitClimb(-1, "null", response.assets[0].uri, gym);
       }
     });
   };
@@ -325,7 +341,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     if (!result.canceled) {
       prop.setImageUri(result.assets[0].uri);
 
-      submitClimb(-1, "null", result.assets[0].uri);
+      submitClimb(-1, "null", result.assets[0].uri, selectedLocation);
     }
   };
 
@@ -349,6 +365,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   }, []);
 
   const saveClimb = async (
+    gym: string,
     grade: number,
     color: string,
     imageUri: string,
@@ -356,14 +373,16 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   ) => {
     const date = Date.now();
     prop.setCurSessionId(date + currentUser);
+    console.log("saving climb at climbing gym: " + gym);
     await db()
-      .ref(`/users/${currentUser}/sessions/${date + currentUser}`)
+      .ref(`/users/${currentUser}/${gym}/sessions/${date + currentUser}`)
       .set({
         grade,
         color,
         imageUri,
         key: date + currentUser,
         date: date,
+        climbingGym: gym,
       });
   };
 
@@ -375,14 +394,21 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   ) => {
     setClimbSubmitted(true);
 
-    await db().ref(`/users/${currentUser}/sessions/${prop.sessionId}`).update({
-      grade: newGrade,
-      color: newColor,
-      imageUri: newImageUri,
-      climbingGym: climbingGym,
-    });
+    console.log("locationContextValue: " + selectedLocation);
+    console.log("updating session with location: " + climbingGym.value);
+
+    await db()
+      .ref(
+        `/users/${currentUser}/${selectedLocation}/sessions/${prop.sessionId}`
+      )
+      .update({
+        grade: newGrade,
+        color: newColor,
+        imageUri: newImageUri,
+        climbingGym: selectedLocation,
+      });
     //get allGrades from database
-    const allGradesPath = `/users/${currentUser}/allGrades`;
+    const allGradesPath = `/users/${currentUser}/${selectedLocation}/allGrades`;
     const allGradesSnapshot = await db().ref(allGradesPath).once("value");
     let allGrades = allGradesSnapshot.val().allGrades as string;
     //Update allGrades

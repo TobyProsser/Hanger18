@@ -1,11 +1,12 @@
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Dimensions } from "react-native";
 import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
 import db from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
 import PlacerColorItem from "./elements/placercoloritem";
+//import LocationContext from "./context/locationcontext";
 
 const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
@@ -27,6 +28,8 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
   const [isScrolling, setIsScrolling] = useState(false);
 
+  //const locationContextValue = useContext(LocationContext);
+
   //Changes color of the
 
   const onLeaderboardChange = (
@@ -38,16 +41,18 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         setLeaderboard(values);
       }
     } else {
+      setLeaderboard([]);
       console.log("NO SNAPSHOT");
     }
   };
 
+  const locationContextValue = "";
   useEffect(() => {
-    const refPath = "/leaderboard";
+    const refPath = `/leaderboards/${locationContextValue}/leaderboard`;
     db().ref(refPath).on("value", onLeaderboardChange);
     //Causing error
     //return () => db().ref(refPath).off("value", onLeaderboardChange);
-  }, []);
+  }, [locationContextValue]);
 
   return (
     <View style={styles.container}>

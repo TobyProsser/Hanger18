@@ -67,6 +67,7 @@ const DropListItemLocation: React.FC<DropListItemLocationProps> = ({
         isExpanded.value = !isExpanded.value;
         const names = businessLocations.map((location) => location.name);
         setSelectedLocation(names[index - 1]);
+        console.log("Setting location to: " + names[index - 1]);
       }}
       style={[
         styles.animatedView,

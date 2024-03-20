@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { View, FlatList, Dimensions, Animated, StyleSheet } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
 import { FeedClimb } from "./types/feedclimb";
 import db from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
+
+import { useLocationContext } from "./context/locationcontext";
 
 const { height: SCREENHEIGHT, width: SCREENWIDTH } = Dimensions.get("screen");
 
@@ -22,7 +24,8 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   const [curSessionId, setCurSessionId] = useState(Date.now());
   const [isUsersClimbs, setIsUsersClimbs] = useState(false);
   const flatListRef = React.useRef<FlatList>(null);
-
+  //console.log(useLocationContext);
+  const { selectedLocation, setSelectedLocation } = useLocationContext();
   const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
     if (snapshot.val()) {
       const values: FeedClimb[] = Array.isArray(snapshot.val())
@@ -46,9 +49,12 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   };
 
   useEffect(() => {
+    console.log(
+      "change in location or session id or current user: " + selectedLocation
+    );
     if (currentUser && !currentUser.includes("[")) {
       try {
-        const refPath = `/users/${currentUser}/sessions`;
+        const refPath = `/users/${currentUser}/${selectedLocation}/sessions`;
         db()
           .ref(refPath)
           .orderByKey()
@@ -63,7 +69,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
     } else {
       console.log("current User is undefined or equal to object Object");
     }
-  }, [currentUser]); //CHANGING THIS TO CURRENTUSER SHOULD MAKE THE SCREEN UPDATE WHEN THE CURRENT USER IS CHANGED, BUT IT RETURNS ERROR.
+  }, [currentUser, selectedLocation, curSessionId]); //CHANGING THIS TO CURRENTUSER SHOULD MAKE THE SCREEN UPDATE WHEN THE CURRENT USER IS CHANGED, BUT IT RETURNS ERROR.
 
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (

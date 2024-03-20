@@ -2,11 +2,17 @@ import { Dimensions, View, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import React, { useCallback, useImperativeHandle } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useImperativeHandle,
+} from "react";
 
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 
@@ -16,6 +22,7 @@ type BottomeSheetProps = {
   children?: React.ReactNode;
   onToggle?: () => void;
   activateFormTouch?: boolean;
+  setActivateFormTouch?: Dispatch<SetStateAction<boolean>>;
 };
 export type BottomSheetRefProps = {
   scrollTo: (destination: number) => void;
@@ -23,7 +30,7 @@ export type BottomSheetRefProps = {
 };
 
 const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
-  ({ children, onToggle, activateFormTouch }, ref) => {
+  ({ children, onToggle, activateFormTouch, setActivateFormTouch }, ref) => {
     const translateY = useSharedValue(SCREENHEIGHT);
     const active = useSharedValue(false);
 
@@ -58,7 +65,8 @@ const DropdownForm = React.forwardRef<BottomSheetRefProps, BottomeSheetProps>(
           scrollTo(SCREENHEIGHT - 50);
         } else {
           scrollTo(0);
-          () => onToggle();
+          runOnJS(setActivateFormTouch)(false);
+          //onToggle();
         }
       });
 

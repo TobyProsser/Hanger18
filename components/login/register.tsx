@@ -18,6 +18,8 @@ import * as ImagePicker from "expo-image-picker";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 
+import businessLocations from "../data/climbgymlocations";
+
 const profileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
 
@@ -34,12 +36,25 @@ export const Register = () => {
     db()
       .ref(`/users/${response.user.uid}/profileImage`)
       .set({ profileImageUri });
-    db().ref(`/users/${response.user.uid}/leaderboard`).set({ totalScore: 0 });
-    db().ref(`/users/${response.user.uid}/lbIndex`).set({ lbIndex: 0 });
-    db()
-      .ref(`/users/${response.user.uid}/climbsAmount`)
-      .set({ climbsAmount: 0 });
-    db().ref(`/users/${response.user.uid}/allGrades`).set({ allGrades: "" });
+    console.log("ruin");
+
+    for (const gym of businessLocations) {
+      console.log(`/users/${response.user.uid}/${gym.name}/allGrades`);
+      db()
+        .ref(`/users/${response.user.uid}/${gym.name}/leaderboard`)
+        .set({ totalScore: 0 });
+      db()
+        .ref(`/users/${response.user.uid}/${gym.name}/lbIndex`)
+        .set({ lbIndex: 0 });
+      db()
+        .ref(`/users/${response.user.uid}/${gym.name}/climbsAmount`)
+        .set({ climbsAmount: 0 });
+      db()
+        .ref(`/users/${response.user.uid}/${gym.name}/allGrades`)
+        .set({ allGrades: "" });
+
+      console.log(`/users/${response.user.uid}/${gym.name}/allGrades`);
+    }
   };
 
   const saveClimb = async (
@@ -51,15 +66,25 @@ export const Register = () => {
   ) => {
     const sessionId = Date.now();
 
-    await db()
-      .ref(`/users/${currentUser}/sessions/${sessionId + currentUser}`)
-      .set({
-        grade,
-        color,
-        imageUri,
-        key: sessionId + currentUser,
-        date: sessionId,
-      });
+    for (const gym of businessLocations) {
+      await db()
+        .ref(
+          `/users/${currentUser}/${gym.name}/sessions/${
+            sessionId + currentUser
+          }`
+        )
+        .set({
+          grade,
+          color,
+          imageUri,
+          key: sessionId + currentUser,
+          date: sessionId,
+        });
+
+      console.log(
+        `/users/${currentUser}/${gym.name}/sessions/${sessionId + currentUser}`
+      );
+    }
   };
 
   const registerAndGoToMainFlow = async () => {
@@ -82,6 +107,7 @@ export const Register = () => {
         }
       } catch (e) {
         Alert.alert(e.nativeErrorMessage);
+        console.log(e.error);
       }
     }
   };

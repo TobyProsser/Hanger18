@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
+import { useLocationContext } from "../context/locationcontext";
+
+//import LocationContext from "../context/locationcontext";
+
 const { width: SCREENWIDTH } = Dimensions.get("screen");
 
 const logo =
@@ -15,6 +19,8 @@ const Profile = (prop: IProfileProps) => {
   const [profileImage, setProfileImage] = useState("null");
   const [lbIndex, setLBIndex] = useState(0);
   const [climbsAmount, setClimbsAmount] = useState(0);
+
+  const { selectedLocation, setSelectedLocation } = useLocationContext();
 
   const getUsersName = async () => {
     const currentUser = auth().currentUser;
@@ -36,7 +42,7 @@ const Profile = (prop: IProfileProps) => {
         });
 
       db()
-        .ref(`/users/${currentUser.uid}/lbIndex`)
+        .ref(`/users/${currentUser.uid}/${selectedLocation}/lbIndex`)
         .on("value", (snapshot) => {
           const data = snapshot.val();
           if (data) {
@@ -48,7 +54,7 @@ const Profile = (prop: IProfileProps) => {
         });
 
       db()
-        .ref(`/users/${currentUser.uid}/climbsAmount`)
+        .ref(`/users/${currentUser.uid}/${selectedLocation}/climbsAmount`)
         .on("value", (snapshot) => {
           const data = snapshot.val();
           if (data) {
@@ -69,11 +75,13 @@ const Profile = (prop: IProfileProps) => {
       if (currentUser) {
         db().ref(`/users/${currentUser.uid}`).off();
         db().ref(`/users/${currentUser.uid}/profileImage`).off();
-        db().ref(`/users/${currentUser.uid}/lbIndex`).off();
-        db().ref(`/users/${currentUser.uid}/climbsAmount`).off();
+        db().ref(`/users/${currentUser.uid}/${selectedLocation}/lbIndex`).off();
+        db()
+          .ref(`/users/${currentUser.uid}/${selectedLocation}/climbsAmount`)
+          .off();
       }
     };
-  }, []);
+  }, [selectedLocation]);
 
   const handleClick = async () => {
     const currentUser = await auth().currentUser;
