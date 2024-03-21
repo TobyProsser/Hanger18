@@ -10,6 +10,7 @@ import {
   Permission,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Color from "color";
 import ColorSelect from "./colorSelect";
@@ -71,6 +72,7 @@ interface ITallClimbHolderProps {
   sessionId: number;
   setCurSessionId: Dispatch<any>;
   isUsersClimbs: boolean;
+  onPress: (summary: string) => void;
 }
 
 const TallClimbHolder = (prop: ITallClimbHolderProps) => {
@@ -81,6 +83,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
   const [locationPermission, setLocationPermission] = useState(null);
+  const [loading, setLoading] = useState(false);
   //const [climbingGym, setClimbingGym] = useState("");
   const climbingGym = useSharedValue("");
   const [header, setHeader] = useState({ label: "V#" });
@@ -88,6 +91,10 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [climbSubmitted, setClimbSubmitted] = useState(false);
 
   const { selectedLocation, setSelectedLocation } = useLocationContext();
+
+  useEffect(() => {
+    console.log("loading: " + loading);
+  }, [loading]);
 
   useEffect(() => {
     console.log("Use effect climbing gym: " + climbingGym.value);
@@ -307,9 +314,23 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }
   };
 
-  const takeImage = async () => {
+  const deleteLastSession = async () => {
+    const currentUser = await auth().currentUser;
+    if (currentUser) {
+      const sessionRef = await db().ref(
+        `/users/${currentUser.uid}/${selectedLocation}/sessions/${prop.sessionId}`
+      );
+      sessionRef.remove();
+    }
+  };
+
+  const takeImage = async (replacing: boolean) => {
     if (!cameraPermission) {
       requestPermissions();
+    }
+
+    if (replacing) {
+      deleteLastSession();
     }
 
     let result = await ImagePicker.launchCameraAsync({
@@ -320,10 +341,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }).then(async (response) => {
       if (!response.canceled) {
         prop.setImageUri(response.assets[0].uri);
+        setLoading(true);
         const gym = await findClimbingGym();
         climbingGym.value = gym;
         setSelectedLocation(gym);
         console.log("awaited for: " + gym);
+
         submitClimb(-1, "null", response.assets[0].uri, gym);
       }
     });
@@ -386,6 +409,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         date: date,
         climbingGym: gym,
       });
+
+    setLoading(false);
   };
 
   const updateClimb = async (
@@ -456,12 +481,30 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         "Are you sure you want to delete this climb and replace it with a new one?",
         [
           { text: "No", onPress: () => console.log("Npo Pressed") },
-          { text: "Yes", onPress: () => takeImage() },
+          { text: "Yes", onPress: () => takeImage(true) },
         ]
       );
     }
     setIsPressed(false);
     opacity.value = withSpring(1, { damping: 10 });
+  };
+
+  const reportUser = async () => {
+    const currentUser = await auth().currentUser;
+    if (currentUser) {
+      Alert.prompt(
+        "Report",
+        "Please give more context to the report:",
+        (text) => {
+          // Handle the entered text (e.g., save it to state or perform an action)
+          console.log("Entered text:", text);
+          prop.onPress("Created by user: " + currentUser + ": " + text);
+        },
+        "plain-text", // Specify the input type (plain-text, secure-text, login-password)
+        "", // Default value for the input field (optional)
+        "default" // Keyboard type (optional)
+      );
+    }
   };
 
   return (
@@ -471,21 +514,32 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
           prop.isUsersClimbs ? (
             <View
               onTouchEnd={() => {
-                takeImage();
+                takeImage(false);
               }}
               style={styles.emptyImageContainer}
             >
-              <Text style={styles.emptyImageText}>+</Text>
+              {loading ? (
+                <ActivityIndicator size="large" />
+              ) : (
+                <Text style={styles.emptyImageText}>+</Text>
+              )}
             </View>
           ) : (
             <View
+              onTouchStart={() => {
+                reportUser();
+              }}
               style={{
                 width: 175,
                 height: 80,
                 borderRadius: 25,
                 backgroundColor: "red",
+
+                justifyContent: "center",
               }}
-            ></View>
+            >
+              <Text style={styles.reportText}>Report</Text>
+            </View>
           )
         ) : (
           <View
@@ -652,5 +706,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     borderRadius: 35,
+  },
+  reportText: {
+    fontSize: 30,
+    color: "white",
+    alignSelf: "center",
+    fontWeight: "600",
   },
 });

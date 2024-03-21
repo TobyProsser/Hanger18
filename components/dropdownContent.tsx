@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { View, FlatList, Dimensions, Animated, StyleSheet } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
@@ -88,6 +88,13 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
     }
   }, [currentUser, selectedLocation, curSessionId]); //CHANGING THIS TO CURRENTUSER SHOULD MAKE THE SCREEN UPDATE WHEN THE CURRENT USER IS CHANGED, BUT IT RETURNS ERROR.
 
+  const onPress = useCallback((summary: string) => {
+    const refPath = `/reports/${selectedLocation}/${currentUser}`;
+    db()
+      .ref(refPath)
+      .update({ reason: "Reporting User: " + currentUser + ", " + summary });
+  }, []);
+
   const scrollX = React.useRef(new Animated.Value(0)).current;
   return (
     <View style={styles.container}>
@@ -142,6 +149,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
                 sessionId={curSessionId}
                 setCurSessionId={setCurSessionId}
                 isUsersClimbs={isUsersClimbs}
+                onPress={onPress}
               />
             </Animated.View>
           );
