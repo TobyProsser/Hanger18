@@ -31,8 +31,6 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
 
   const { selectedLocation, setSelectedLocation } = useLocationContext();
 
-  //Changes color of the
-
   const onLeaderboardChange = (
     snapshot: FirebaseDatabaseTypes.DataSnapshot
   ) => {
@@ -134,7 +132,12 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                         <Text style={styles.nameText}>{item.name}</Text>
                         <View style={styles.line}></View>
                         <View style={styles.textSpacing}>
-                          <Text style={styles.text}>{item.allGrades}</Text>
+                          <Text style={styles.text}>
+                            {" "}
+                            {item.allGrades.length >= 16
+                              ? item.allGrades.slice(0, 16) + " ..."
+                              : item.allGrades}
+                          </Text>
                         </View>
                       </View>
                     </View>
