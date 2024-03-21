@@ -64,6 +64,7 @@ const DropListItem: React.FC<DropListItemProps> = ({
   return (
     <Animated.View
       onTouchEnd={() => {
+        console.log(submitted);
         //If grade is set, dont allow user to click on button
         if (!submitted) {
           if (label === "V7") {

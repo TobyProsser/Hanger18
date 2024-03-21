@@ -25,7 +25,8 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   const [isUsersClimbs, setIsUsersClimbs] = useState(false);
   const flatListRef = React.useRef<FlatList>(null);
   //console.log(useLocationContext);
-  const { selectedLocation, setSelectedLocation } = useLocationContext();
+  const { selectedLocation, sessionScrollTo, setSessionScrollTo } =
+    useLocationContext();
   const onClimbChange = (snapshot: FirebaseDatabaseTypes.DataSnapshot) => {
     if (snapshot.val()) {
       const values: FeedClimb[] = Array.isArray(snapshot.val())
@@ -40,8 +41,24 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   React.useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+      console.log("SCROLLTO_START");
     }
   }, [curSessionId]);
+
+  React.useEffect(() => {
+    if (sessionScrollTo == 10) {
+      addButtonScroll();
+      setSessionScrollTo(0);
+    }
+  }, [sessionScrollTo]);
+
+  const addButtonScroll = async () => {
+    // Wait for 1 second1 (1000 milliseconds)
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    flatListRef.current.scrollToEnd({ animated: true });
+    console.log("SCROLLTOEND");
+  };
 
   const checkIfCurrentUser = async () => {
     const loggedInUser = await auth().currentUser;

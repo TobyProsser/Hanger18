@@ -1,6 +1,6 @@
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
 import React, { useEffect, useState, useContext } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
 import db from "@react-native-firebase/database";
@@ -92,48 +92,55 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
             });
 
             return (
-              <Animated.View
-                onTouchEnd={() => {
+              <TouchableOpacity
+                onPress={() => {
                   if (!isScrolling) {
+                    console.log("current User: " + item.currentUser);
                     prop.onPress(item.currentUser);
+                  } else {
+                    console.log("scrolling");
                   }
                 }}
-                style={[
-                  styles.parentContainerStyle,
-                  //{ opacity, transform: [{ scale }] },
-                ]}
+                activeOpacity={0.8}
               >
-                <View style={styles.centerAlign}>
-                  <View style={styles.placerItemContainter}>
-                    <PlacerColorItem index={index} />
-                  </View>
-
-                  <View style={styles.contentContainer}>
-                    <View style={styles.shadow}>
-                      <Image
-                        source={{
-                          uri: item.profilePic
-                            ? item.profilePic
-                            : unsetProfileImage,
-                        }}
-                        style={{
-                          width: AVATAR_SIZE,
-                          height: AVATAR_SIZE,
-                          borderRadius: AVATAR_SIZE,
-                          marginRight: SPACING / 2,
-                        }}
-                      />
+                <Animated.View
+                  style={[
+                    styles.parentContainerStyle,
+                    //{ opacity, transform: [{ scale }] },
+                  ]}
+                >
+                  <View style={styles.centerAlign}>
+                    <View style={styles.placerItemContainter}>
+                      <PlacerColorItem index={index} />
                     </View>
-                    <View style={styles.column}>
-                      <Text style={styles.nameText}>{item.name}</Text>
-                      <View style={styles.line}></View>
-                      <View style={styles.textSpacing}>
-                        <Text style={styles.text}>{item.allGrades}</Text>
+
+                    <View style={styles.contentContainer}>
+                      <View style={styles.shadow}>
+                        <Image
+                          source={{
+                            uri: item.profilePic
+                              ? item.profilePic
+                              : unsetProfileImage,
+                          }}
+                          style={{
+                            width: AVATAR_SIZE,
+                            height: AVATAR_SIZE,
+                            borderRadius: AVATAR_SIZE,
+                            marginRight: SPACING / 2,
+                          }}
+                        />
+                      </View>
+                      <View style={styles.column}>
+                        <Text style={styles.nameText}>{item.name}</Text>
+                        <View style={styles.line}></View>
+                        <View style={styles.textSpacing}>
+                          <Text style={styles.text}>{item.allGrades}</Text>
+                        </View>
                       </View>
                     </View>
                   </View>
-                </View>
-              </Animated.View>
+                </Animated.View>
+              </TouchableOpacity>
             );
           }}
         />
@@ -184,7 +191,6 @@ const styles = StyleSheet.create({
     padding: 20,
     zIndex: 1,
     flex: 1,
-    top: 350,
   },
   rowStyle: {
     left: -30,
@@ -217,6 +223,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     overflow: "hidden",
     height: 100,
-    top: 105,
+    top: 455,
   },
 });

@@ -9,12 +9,16 @@ import {
   PermissionsAndroid,
   Permission,
   Platform,
+  Alert,
 } from "react-native";
 import Color from "color";
 import ColorSelect from "./colorSelect";
 import Dropdown from "./dropList";
 import ColorDropdown from "./dropListColor";
-import { GestureDetector } from "react-native-gesture-handler";
+import {
+  GestureDetector,
+  TouchableWithoutFeedback,
+} from "react-native-gesture-handler";
 
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -24,8 +28,6 @@ import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 
 import Animated, {
-  Extrapolate,
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -435,6 +437,33 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       opacity: withTiming(isGradeExpanded.value ? 1 : 0),
     };
   }, []);
+
+  const [touchStartTime, setTouchStartTime] = useState(0);
+  const [isPressed, setIsPressed] = useState(false);
+  const opacity = useSharedValue(1);
+
+  const handlePressIn = () => {
+    setTouchStartTime(Date.now());
+    setIsPressed(true);
+    opacity.value = withSpring(0, { damping: 200 });
+  };
+  const handlePressOut = () => {
+    const touchDuration = Date.now() - touchStartTime;
+    if (touchDuration >= 500) {
+      // Long press detected (duration >= 1000 milliseconds)
+      Alert.alert(
+        "Replace Climb",
+        "Are you sure you want to delete this climb and replace it with a new one?",
+        [
+          { text: "No", onPress: () => console.log("Npo Pressed") },
+          { text: "Yes", onPress: () => takeImage() },
+        ]
+      );
+    }
+    setIsPressed(false);
+    opacity.value = withSpring(1, { damping: 10 });
+  };
+
   return (
     <View style={[styles.climbHolder, { width: prop.cardWidth }]}>
       <View>
@@ -449,59 +478,94 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
               <Text style={styles.emptyImageText}>+</Text>
             </View>
           ) : (
-            <View />
+            <View
+              style={{
+                width: 175,
+                height: 80,
+                borderRadius: 25,
+                backgroundColor: "red",
+              }}
+            ></View>
           )
         ) : (
-          <View style={styles.container}>
-            <ImageBackground
-              source={{
-                uri: prop.imageUri,
-              }}
-              style={[
-                styles.backgroundImage,
-                {
-                  width: CARD_HOLDER_WIDTH,
-                  height: CARD_HOLDER_HEIGHT,
-                },
-              ]}
+          <View
+            style={{
+              flex: 1,
+              alignSelf: "center",
+            }}
+          >
+            <TouchableWithoutFeedback
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
             >
-              <View style={styles.rowContainer}>
-                <View style={styles.row}>
-                  <View>
-                    <Dropdown
-                      header={header}
-                      options={options}
-                      isExpanded={isGradeExpanded}
-                      grade={grade1}
-                      setGrade={setGrade1}
-                      secondRow={false}
-                      submitted={climbSubmitted}
-                    />
-                  </View>
-                  <Animated.View style={[{ top: 32 }, rStyle]}>
-                    <Dropdown
-                      header={header1}
-                      options={options1}
-                      isExpanded={isGradeExpanded}
-                      grade={grade1}
-                      setGrade={setGrade1}
-                      secondRow={true}
-                      submitted={climbSubmitted}
-                    />
-                  </Animated.View>
-                </View>
-
-                <View style={styles.colorContainer}>
-                  <ColorDropdown
-                    header={header1}
-                    options={options1}
-                    isExpanded={isColorExpanded}
-                    color={setColor1}
-                    getColor={color1}
+              <View style={styles.container}>
+                <Animated.View style={{ opacity }}>
+                  <ImageBackground
+                    source={{
+                      uri: prop.imageUri,
+                    }}
+                    style={[
+                      styles.backgroundImage,
+                      {
+                        width: CARD_HOLDER_WIDTH,
+                        height: CARD_HOLDER_HEIGHT,
+                      },
+                    ]}
+                  ></ImageBackground>
+                </Animated.View>
+              </View>
+            </TouchableWithoutFeedback>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "orange",
+                position: "absolute",
+              }}
+            >
+              <View style={styles.row}>
+                <View>
+                  <Dropdown
+                    header={header}
+                    options={options}
+                    isExpanded={isGradeExpanded}
+                    grade={grade1}
+                    setGrade={setGrade1}
+                    secondRow={false}
                     submitted={climbSubmitted}
                   />
                 </View>
+                <Animated.View style={[{ top: 32 }, rStyle]}>
+                  <Dropdown
+                    header={header1}
+                    options={options1}
+                    isExpanded={isGradeExpanded}
+                    grade={grade1}
+                    setGrade={setGrade1}
+                    secondRow={true}
+                    submitted={climbSubmitted}
+                  />
+                </Animated.View>
               </View>
+              <View style={styles.colorContainer}>
+                <ColorDropdown
+                  header={header1}
+                  options={options1}
+                  isExpanded={isColorExpanded}
+                  color={setColor1}
+                  getColor={color1}
+                  submitted={climbSubmitted}
+                />
+              </View>
+            </View>
+            <View
+              style={{
+                position: "absolute",
+                alignSelf: "center",
+                justifyContent: "flex-end",
+                width: 300,
+                top: 220,
+              }}
+            >
               {color1 != "null" && grade1 != -1 && !climbSubmitted ? (
                 <View
                   onTouchEnd={() => {
@@ -522,7 +586,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
               ) : (
                 <View></View>
               )}
-            </ImageBackground>
+            </View>
           </View>
         )}
       </View>
@@ -548,24 +612,29 @@ const styles = StyleSheet.create({
   },
   colorContainer: {
     width: 100,
-    alignItems: "flex-start",
     alignSelf: "flex-end",
-    height: "100%",
-    right: 20,
+    left: 180,
   },
   row: {
     flexDirection: "row",
     gap: 80,
     left: 20,
+    width: "100%",
+    height: "100%",
   },
   rowContainer: {
-    top: 20,
-    flex: 1,
-    height: "100%",
+    width: "100%",
+    top: 10,
+    backgroundColor: "red",
+    justifyContent: "space-between",
     opacity: 0.95,
   },
   backgroundImage: { borderRadius: 25, overflow: "hidden", bottom: 17 },
-  container: { flex: 1, alignItems: "center", justifyContent: "flex-start" },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
   emptyImageText: { fontSize: 50, top: 15 },
   emptyImageContainer: {
     alignItems: "center",
@@ -575,7 +644,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   climbHolder: {
-    top: 100,
+    top: 110,
     alignItems: "center",
     elevation: 5, // For shadow on Android
     shadowColor: "#000",

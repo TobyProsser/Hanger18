@@ -35,6 +35,8 @@ export default function HomeScreen() {
     options[0].label
   );
 
+  const [sessionScrollTo, setSessionScrollTo] = useState(0);
+
   const value = { selectedLocation, setSelectedLocation };
 
   const [header, setHeader] = useState({ label: options[0].label });
@@ -58,14 +60,23 @@ export default function HomeScreen() {
     if (isActive) {
       ref?.current?.scrollTo(0);
       setActivateFormTouch(false);
+      console.log("REF IS ACTIVE");
     } else {
       ref?.current?.scrollTo(SCREENHEIGHT * 0.65);
       setActivateFormTouch(true);
+      console.log("REF IS NOT");
     }
   }, []);
 
   return (
-    <LocationContext.Provider value={{ selectedLocation, setSelectedLocation }}>
+    <LocationContext.Provider
+      value={{
+        sessionScrollTo,
+        setSessionScrollTo,
+        selectedLocation,
+        setSelectedLocation,
+      }}
+    >
       <GestureHandlerRootView style={styles.container}>
         <View style={styles.wrapper}>
           <Profile onPress={onPress} />
@@ -90,7 +101,7 @@ export default function HomeScreen() {
               borderRadius: 20,
               backgroundColor: "blue",
               alignSelf: "flex-end",
-              zIndex: activateFormTouch ? 0 : 5,
+              zIndex: 1.5,
             }}
           >
             <DropdownLocation

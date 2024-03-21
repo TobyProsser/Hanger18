@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
@@ -13,6 +19,7 @@ const logo =
 
 interface IProfileProps {
   onPress: (currentUser) => void;
+  setActivateFormTouch?: Dispatch<SetStateAction<boolean>>;
 }
 const Profile = (prop: IProfileProps) => {
   const [name, setName] = useState("null");
@@ -20,7 +27,7 @@ const Profile = (prop: IProfileProps) => {
   const [lbIndex, setLBIndex] = useState(0);
   const [climbsAmount, setClimbsAmount] = useState(0);
 
-  const { selectedLocation, setSelectedLocation } = useLocationContext();
+  const { selectedLocation, setSessionScrollTo } = useLocationContext();
 
   const getUsersName = async () => {
     const currentUser = auth().currentUser;
@@ -101,6 +108,7 @@ const Profile = (prop: IProfileProps) => {
           style={styles.button}
           onTouchEnd={() => {
             handleClick();
+            setSessionScrollTo(10);
           }}
         >
           <Text style={styles.text}>Add</Text>
