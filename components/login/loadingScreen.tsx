@@ -11,7 +11,7 @@ export const LoadingScreen = () => {
 
   function onAuthStateChanged(user: FirebaseAuthTypes.User | null) {
     if (user) {
-      nav.replace("Home");
+      nav.replace("Login");
     } else {
       nav.replace("Login");
     }

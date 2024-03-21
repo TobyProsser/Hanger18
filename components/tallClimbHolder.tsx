@@ -519,7 +519,18 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
               style={styles.emptyImageContainer}
             >
               {loading ? (
-                <ActivityIndicator size="large" />
+                <View
+                  style={{
+                    flexDirection: "column",
+                    gap: 20,
+                  }}
+                >
+                  <Text style={{ textAlign: "center" }}>
+                    Verifying image was taken from a climbing gym and sending
+                    climb to assicated database...
+                  </Text>
+                  <ActivityIndicator size="large" />
+                </View>
               ) : (
                 <Text style={styles.emptyImageText}>+</Text>
               )}
@@ -693,7 +704,7 @@ const styles = StyleSheet.create({
   emptyImageContainer: {
     alignItems: "center",
     justifyContent: "flex-start",
-    width: 100,
+    width: 250,
     height: 100,
     borderRadius: 25,
   },
