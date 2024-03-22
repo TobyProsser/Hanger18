@@ -146,7 +146,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
                 color={item.color}
                 cardWidth={CLIMB_HOLDER_WIDTH}
                 key={item.key}
-                sessionId={curSessionId}
+                sessionId={item.key}
                 setCurSessionId={setCurSessionId}
                 isUsersClimbs={isUsersClimbs}
                 onPress={onPress}

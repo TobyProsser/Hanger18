@@ -155,6 +155,13 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log("Closest business:", closestBusiness.name);
       console.log("Distance:", minDistance, "meters");
 
+      if (minDistance == 2) {
+        Alert.alert(
+          "You are not close enough to a registered gym to submit climb."
+        );
+        return "null";
+      }
+
       return closestBusiness.name;
     } else {
       return "No-Business-Found";
@@ -316,7 +323,9 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const deleteLastSession = async () => {
     const currentUser = await auth().currentUser;
-    if (currentUser) {
+    console.log("current user " + currentUser.displayName);
+    if (currentUser && prop.isUsersClimbs) {
+      console.log("PROP ID: " + prop.sessionId);
       const sessionRef = await db().ref(
         `/users/${currentUser.uid}/${selectedLocation}/sessions/${prop.sessionId}`
       );
@@ -343,11 +352,15 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         prop.setImageUri(response.assets[0].uri);
         setLoading(true);
         const gym = await findClimbingGym();
-        climbingGym.value = gym;
-        setSelectedLocation(gym);
-        console.log("awaited for: " + gym);
+        if (gym != "null") {
+          climbingGym.value = gym;
+          setSelectedLocation(gym);
+          console.log("awaited for: " + gym);
 
-        submitClimb(-1, "null", response.assets[0].uri, gym);
+          submitClimb(-1, "null", response.assets[0].uri, gym);
+        } else {
+          setLoading(false);
+        }
       }
     });
   };
