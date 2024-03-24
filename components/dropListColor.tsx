@@ -9,6 +9,7 @@ type DropListItemColorProps = {
   isExpanded: Animated.SharedValue<boolean>;
   color: Dispatch<SetStateAction<string>>;
   getColor: string;
+  secondRow: boolean;
   submitted: boolean;
 };
 
@@ -18,6 +19,7 @@ const ColorDropdown: React.FC<DropListItemColorProps> = ({
   isExpanded,
   color,
   getColor,
+  secondRow,
   submitted,
 }) => {
   const dropdownItems = [header, ...options];
@@ -38,6 +40,7 @@ const ColorDropdown: React.FC<DropListItemColorProps> = ({
             color={color}
             dropdownItemsCount={dropdownItems.length}
             getColor={getColor}
+            secondRow={secondRow}
             submitted={submitted}
           />
         );

@@ -1,5 +1,5 @@
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
@@ -8,6 +8,9 @@ import { FeedClimb } from "./types/feedclimb";
 import PlacerColorItem from "./elements/placercoloritem";
 import { useLocationContext } from "./context/locationcontext";
 //import LocationContext from "./context/locationcontext";
+
+import businessLocations from "./data/climbgymlocations";
+import leaderboardItem from "./leaderboardItem";
 
 const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
@@ -24,12 +27,13 @@ interface ILeaderbaordProps {
 }
 
 const LeaderboardList = (prop: ILeaderbaordProps) => {
-  const scrollY = React.useRef(new Animated.Value(0)).current;
-
+  const scrollY = useRef(new Animated.Value(0)).current;
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
   const [isScrolling, setIsScrolling] = useState(false);
-
+  const [prevLocation, setPrevLocation] = useState("");
   const { selectedLocation, setSelectedLocation } = useLocationContext();
+
+  const [loadedItems, setLoadedItems] = useState(7); // Initial number of items to load
 
   const onLeaderboardChange = (
     snapshot: FirebaseDatabaseTypes.DataSnapshot
@@ -37,7 +41,13 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
     if (snapshot.val()) {
       const values: FeedClimb[] = snapshot.val();
       if (values) {
-        setLeaderboard(values);
+        const spacerValue: FeedClimb = {
+          key: "spacer",
+          allGrades: "",
+          currentUser: "",
+          climbingGym: "",
+        };
+        setLeaderboard([...values, spacerValue]);
       }
     } else {
       setLeaderboard([]);
@@ -45,24 +55,117 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
     }
   };
 
+  const retrieveData = async (refPath: string) => {
+    try {
+      const snapshot = await db()
+        .ref(refPath)
+        .orderByKey()
+        .limitToLast(loadedItems)
+        .once("value");
+
+      const values: FeedClimb[] = [];
+      const spacerValue: FeedClimb = {
+        key: "spacer",
+        allGrades: "",
+        currentUser: "",
+        climbingGym: "",
+      };
+      snapshot.forEach((childSnapshot) => {
+        const value = childSnapshot.val();
+        if (value) {
+          values.push(value);
+        } else {
+          return true;
+        }
+      });
+
+      setLeaderboard([...values, spacerValue]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const retrieveMore = async () => {
+    console.log("Retrieving more data");
+    try {
+      const lastVisibleKey = leaderboard[leaderboard.length - 1]?.key;
+      if (!lastVisibleKey) return; // No more items to load
+
+      const additionalSnapshot = await db()
+        .ref(`/leaderboards/${selectedLocation}/leaderboard`)
+        .orderByKey()
+        .startAt(lastVisibleKey)
+        .limitToFirst(loadedItems)
+        .once("value");
+
+      const additionalValues: FeedClimb[] = [];
+      additionalSnapshot.forEach((childSnapshot) => {
+        const value = childSnapshot.val();
+        if (value) {
+          additionalValues.push(value);
+        } else {
+          return true;
+        }
+      });
+
+      const spacerValue: FeedClimb = {
+        key: "spacer",
+        allGrades: "",
+        currentUser: "",
+        climbingGym: "",
+      };
+      //Remove spacer
+      leaderboard.pop();
+      setLeaderboard([...leaderboard, ...additionalValues, spacerValue]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const refPath = `/leaderboards/${selectedLocation}/leaderboard`;
-    db().ref(refPath).on("value", onLeaderboardChange);
-    //Causing error
-    //return () => db().ref(refPath).off("value", onLeaderboardChange);
+    let refPath = "";
+    if (selectedLocation) {
+      refPath = `/leaderboards/${selectedLocation}/leaderboard`;
+      setPrevLocation(selectedLocation);
+    } else {
+      if (prevLocation) {
+        refPath = `/leaderboards/${prevLocation}/leaderboard`;
+      } else {
+        refPath = `/leaderboards/${businessLocations[0].name}/leaderboard`;
+      }
+    }
+    retrieveData(refPath);
   }, [selectedLocation]);
+
+  // useEffect(() => {
+  //   let refPath = "";
+  //   if (selectedLocation) {
+  //     refPath = `/leaderboards/${selectedLocation}/leaderboard`;
+  //     setPrevLocation(selectedLocation);
+  //   } else {
+  //     if (prevLocation) {
+  //       refPath = `/leaderboards/${prevLocation}/leaderboard`;
+  //     } else {
+  //       refPath = `/leaderboards/${businessLocations[0].name}/leaderboard`;
+  //     }
+  //   }
+  //   db().ref(refPath).on("value", onLeaderboardChange);
+  //   //Causing error
+  //   //return () => db().ref(refPath).off("value", onLeaderboardChange);
+  // }, [selectedLocation]);
 
   return (
     <View style={styles.container}>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 0.65, top: 260 }}>
         <Animated.FlatList
-          data={leaderboard}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
-          )}
+          data={leaderboard.slice(0, loadedItems)}
+          onEndReached={() => {
+            retrieveMore;
+          }}
           onScrollBeginDrag={() => setIsScrolling(true)}
-          onScrollEndDrag={() => setIsScrolling(false)}
+          onScrollEndDrag={() => {
+            setIsScrolling(false);
+          }}
           keyExtractor={(item) => item.key}
           contentContainerStyle={{
             padding: SPACING,
@@ -89,7 +192,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
               outputRange: [1, 1, 1, 0],
             });
 
-            return (
+            return item.key != "spacer" ? (
               <TouchableOpacity
                 onPress={() => {
                   if (!isScrolling) {
@@ -144,6 +247,8 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                   </View>
                 </Animated.View>
               </TouchableOpacity>
+            ) : (
+              <View style={{ height: 250 }} />
             );
           }}
         />
@@ -226,6 +331,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     overflow: "hidden",
     height: 100,
-    top: 455,
+    top: 200,
   },
 });

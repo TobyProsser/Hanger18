@@ -36,10 +36,8 @@ export const Register = () => {
     db()
       .ref(`/users/${response.user.uid}/profileImage`)
       .set({ profileImageUri });
-    console.log("ruin");
 
     for (const gym of businessLocations) {
-      console.log(`/users/${response.user.uid}/${gym.name}/allGrades`);
       db()
         .ref(`/users/${response.user.uid}/${gym.name}/leaderboard`)
         .set({ totalScore: 0 });
@@ -53,7 +51,7 @@ export const Register = () => {
         .ref(`/users/${response.user.uid}/${gym.name}/allGrades`)
         .set({ allGrades: "" });
 
-      console.log(`/users/${response.user.uid}/${gym.name}/allGrades`);
+      console.log("gym name: " + gym.name);
     }
   };
 
@@ -67,23 +65,25 @@ export const Register = () => {
     const sessionId = Date.now();
 
     for (const gym of businessLocations) {
-      await db()
-        .ref(
-          `/users/${currentUser}/${gym.name}/sessions/${
-            sessionId + currentUser
-          }`
-        )
-        .set({
-          grade,
-          color,
-          imageUri,
-          key: sessionId + currentUser,
-          date: sessionId,
-        });
-
-      console.log(
-        `/users/${currentUser}/${gym.name}/sessions/${sessionId + currentUser}`
-      );
+      try {
+        await db()
+          .ref(
+            `/users/${currentUser}/${gym.name}/sessions/${
+              sessionId + currentUser
+            }`
+          )
+          .set({
+            grade,
+            color,
+            imageUri,
+            key: sessionId + currentUser,
+            date: sessionId,
+            climbingGym: gym.name,
+          });
+        console.log("Data successfully set in Firebase.");
+      } catch (error) {
+        console.error("Error setting data in Firebase:", error);
+      }
     }
   };
 
@@ -94,14 +94,14 @@ export const Register = () => {
           email,
           password
         );
-
         if (response.user) {
           await createProfile(response);
-          const currentUser = auth().currentUser;
-
+          const currentUser = await auth().currentUser;
+          console.log("currwnt user: " + currentUser.uid);
           //Save an empty climb, this acts as the adding button at the end of the climbs list
           if (currentUser) {
             await saveClimb(0, "null", "null", "Adder", currentUser.uid);
+            console.log("CLimbSaved");
           }
           nav.replace("Home");
         }

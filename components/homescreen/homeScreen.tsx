@@ -37,8 +37,6 @@ export default function HomeScreen() {
 
   const [sessionScrollTo, setSessionScrollTo] = useState(0);
 
-  const value = { selectedLocation, setSelectedLocation };
-
   const [header, setHeader] = useState({ label: options[0].label });
 
   useEffect(() => {

@@ -7,8 +7,16 @@ const PlacerColorItem = ({ index }: { index: number }) => {
 
   // Create the color interpolation
   const backgroundColor = animatedValue.interpolate({
-    inputRange: [0, 5, 6, 100, 101],
-    outputRange: ["gold", "silver", "pink", "yellow", "purple"],
+    inputRange: [0, 1, 2, 3, 6, 100, 101],
+    outputRange: [
+      "gold",
+      "silver",
+      "orange",
+      "pink",
+      "blue",
+      "yellow",
+      "purple",
+    ],
     extrapolate: "clamp",
   });
   return (

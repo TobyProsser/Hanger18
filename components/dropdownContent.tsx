@@ -114,7 +114,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
         snapToAlignment="center"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
+          { useNativeDriver: true }
         )}
         scrollEventThrottle={16}
         renderItem={({ item, index }) => {

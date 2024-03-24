@@ -17,6 +17,7 @@ type DropListItemColorProps = DropListItemColorType & {
   isExpanded: Animated.SharedValue<boolean>;
   color: Dispatch<SetStateAction<string>>;
   getColor: string;
+  secondRow: boolean;
   submitted: boolean;
 };
 
@@ -26,6 +27,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   isExpanded,
   color,
   getColor,
+  secondRow,
   submitted,
 }) => {
   const DropListItemHeight = 50;
@@ -66,6 +68,16 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
         return "grey";
       case 5:
         return "green";
+      case 6:
+        return "red";
+      case 7:
+        return "orange";
+      case 8:
+        return "black";
+      case 9:
+        return "teal";
+      case 10:
+        return "brown";
     }
   };
   const rStyle = useAnimatedStyle<AnimatedStyle>(() => {
@@ -92,8 +104,15 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
         //If the color has been set, dont allow the user to click on the color drop down
         if (!submitted) {
           if (!isHeader) {
-            color(returnColorString(index));
+            secondRow
+              ? color(returnColorString(index + 6))
+              : color(returnColorString(index));
+          } else {
+            if (secondRow) {
+              color(returnColorString(index + 6));
+            }
           }
+
           isExpanded.value = !isExpanded.value;
         }
       }}
@@ -113,7 +132,12 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
           style={[
             styles.innerAnimatedView,
             {
-              backgroundColor: index == 0 ? getColor : returnColorString(index),
+              backgroundColor:
+                index == 0 && !secondRow
+                  ? getColor
+                  : secondRow
+                  ? returnColorString(index + 6)
+                  : returnColorString(index),
             },
           ]}
         />

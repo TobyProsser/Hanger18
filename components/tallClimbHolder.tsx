@@ -60,6 +60,13 @@ const options1 = [
   { label: "V12" },
 ];
 
+const options2 = [
+  { label: "V8" },
+  { label: "V9" },
+  { label: "V10" },
+  { label: "V11" },
+];
+
 const header = { label: "V#" };
 const header1 = { label: "V7" };
 
@@ -476,6 +483,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     };
   }, []);
 
+  const rStyle1 = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(isColorExpanded.value ? 1 : 0),
+    };
+  }, []);
+
   const [touchStartTime, setTouchStartTime] = useState(0);
   const [isPressed, setIsPressed] = useState(false);
   const opacity = useSharedValue(1);
@@ -624,15 +637,36 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                   />
                 </Animated.View>
               </View>
-              <View style={styles.colorContainer}>
-                <ColorDropdown
-                  header={header1}
-                  options={options1}
-                  isExpanded={isColorExpanded}
-                  color={setColor1}
-                  getColor={color1}
-                  submitted={climbSubmitted}
-                />
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: -210,
+                }}
+              >
+                <View style={styles.colorContainer}>
+                  <ColorDropdown
+                    header={header1}
+                    options={options1}
+                    isExpanded={isColorExpanded}
+                    color={setColor1}
+                    getColor={color1}
+                    secondRow={false}
+                    submitted={climbSubmitted}
+                  />
+                </View>
+                <Animated.View
+                  style={[styles.colorContainer, { top: 50 + 2 }, rStyle1]}
+                >
+                  <ColorDropdown
+                    header={header1}
+                    options={options2}
+                    isExpanded={isColorExpanded}
+                    color={setColor1}
+                    getColor={color1}
+                    secondRow={true}
+                    submitted={climbSubmitted}
+                  />
+                </Animated.View>
               </View>
             </View>
             <View
