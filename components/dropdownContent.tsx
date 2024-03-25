@@ -41,7 +41,6 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   React.useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
-      console.log("SCROLLTO_START");
     }
   }, [curSessionId]);
 
@@ -57,7 +56,6 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     flatListRef.current.scrollToEnd({ animated: true });
-    console.log("SCROLLTOEND");
   };
 
   const checkIfCurrentUser = async () => {
@@ -66,9 +64,6 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   };
 
   useEffect(() => {
-    console.log(
-      "change in location or session id or current user: " + selectedLocation
-    );
     if (currentUser && !currentUser.includes("[")) {
       try {
         const refPath = `/users/${currentUser}/${selectedLocation}/sessions`;

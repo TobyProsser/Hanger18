@@ -103,10 +103,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     console.log("loading: " + loading);
   }, [loading]);
 
-  useEffect(() => {
-    console.log("Use effect climbing gym: " + climbingGym.value);
-  }, [climbingGym]);
-
   function deg2rad(deg) {
     return deg * (Math.PI / 180);
   }
@@ -154,7 +150,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         if (distance < minDistance) {
           minDistance = distance;
           closestBusiness = gym;
-          console.log(gym);
         }
       }
 
@@ -162,9 +157,9 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log("Closest business:", closestBusiness.name);
       console.log("Distance:", minDistance, "meters");
 
-      if (minDistance == 2) {
+      if (minDistance > 2) {
         Alert.alert(
-          "You are not close enough to a registered gym to submit climb."
+          `You are not close enough to a registered gym to submit climb. You are ${minDistance} km away`
         );
         return "null";
       }

@@ -45,7 +45,6 @@ export default function HomeScreen() {
 
   const toggleActivateFormTouch = useCallback(() => {
     "worklet";
-    console.log("WORKLET RAN");
     runOnJS(setActivateFormTouch)(
       (prevActivateFormTouch) => !prevActivateFormTouch
     );
@@ -58,11 +57,9 @@ export default function HomeScreen() {
     if (isActive) {
       ref?.current?.scrollTo(0);
       setActivateFormTouch(false);
-      console.log("REF IS ACTIVE");
     } else {
       ref?.current?.scrollTo(SCREENHEIGHT * 0.65);
       setActivateFormTouch(true);
-      console.log("REF IS NOT");
     }
   }, []);
 

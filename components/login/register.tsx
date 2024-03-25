@@ -50,6 +50,7 @@ export const Register = () => {
       db()
         .ref(`/users/${response.user.uid}/${gym.name}/allGrades`)
         .set({ allGrades: "" });
+      db().ref(`/users/${response.user.uid}`).set({ admin: false });
 
       console.log("gym name: " + gym.name);
     }

@@ -5,7 +5,7 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Image, Dimensions, Alert } from "react-native";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 import { useLocationContext } from "../context/locationcontext";
@@ -26,6 +26,7 @@ const Profile = (prop: IProfileProps) => {
   const [profileImage, setProfileImage] = useState("null");
   const [lbIndex, setLBIndex] = useState(0);
   const [climbsAmount, setClimbsAmount] = useState(0);
+  const [admin, setAdmin] = useState(false);
 
   const { selectedLocation, setSessionScrollTo } = useLocationContext();
 
@@ -34,7 +35,7 @@ const Profile = (prop: IProfileProps) => {
     if (currentUser) {
       db()
         .ref(`/users/${currentUser.uid}`)
-        .on("value", (snapshot) => {
+        .once("value", (snapshot) => {
           const userData = snapshot.val();
           const name = userData.name;
           setName(name);
@@ -42,7 +43,7 @@ const Profile = (prop: IProfileProps) => {
 
       db()
         .ref(`/users/${currentUser.uid}/profileImage`)
-        .on("value", (snapshot) => {
+        .once("value", (snapshot) => {
           const data = snapshot.val();
           const profileImage = data.profileImageUri;
           setProfileImage(profileImage);
@@ -67,6 +68,17 @@ const Profile = (prop: IProfileProps) => {
           if (data) {
             const tempClimbsAmount = data.climbsAmount;
             setClimbsAmount(tempClimbsAmount);
+          } else {
+            console.log("The climbsAmount path does not exist.");
+          }
+        });
+      db()
+        .ref(`/users/${currentUser.uid}/`)
+        .once("value", (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            const admin = data.admin;
+            setAdmin(admin);
           } else {
             console.log("The climbsAmount path does not exist.");
           }
@@ -99,6 +111,50 @@ const Profile = (prop: IProfileProps) => {
 
   return (
     <View style={styles.profileContainer}>
+      <View style={{ justifyContent: "flex-end" }}>
+        {admin ? (
+          <View
+            style={[
+              styles.button,
+              {
+                backgroundColor: "red",
+                position: "absolute",
+                alignSelf: "center",
+                alignItems: "center",
+                top: 270,
+                width: 250,
+              },
+            ]}
+            onTouchEnd={() => {
+              Alert.alert(
+                "Toby are you sure you want to delete everyones data?"
+              );
+              [
+                { text: "No", onPress: () => console.log("No Pressed") },
+                {
+                  text: "Yes",
+                  onPress: () => {
+                    Alert.alert(
+                      "Toby are you sure you want to delete everyones data?"
+                    );
+                    [
+                      { text: "No", onPress: () => console.log("No Pressed") },
+                      {
+                        text: "Yes",
+                        onPress: () => adminFunctionToDeleteEveryUsersData(),
+                      },
+                    ];
+                  },
+                },
+              ];
+            }}
+          >
+            <Text style={styles.text}>Delete Everything</Text>
+          </View>
+        ) : (
+          <View />
+        )}
+      </View>
       <View
         style={{
           width: SCREENWIDTH,
@@ -132,8 +188,43 @@ const Profile = (prop: IProfileProps) => {
       </View>
     </View>
   );
-};
 
+  const adminFunctionToDeleteEveryUsersData = () => {
+    const users = db().ref("/users/");
+    try {
+      for (const user in users) {
+        const userSessions = db().ref(
+          `/users/${user}/${selectedLocation}/sessions/`
+        );
+        deleteAllFilesInFolder(userSessions);
+      }
+    } catch (e) {
+      console.log("could not get users sessions" + e.error);
+      Alert.alert("Could not get users sesssions: " + e.error);
+    }
+  };
+
+  const deleteAllFilesInFolder = async (sessionsFolder) => {
+    try {
+      let index = 0;
+      for (const session of sessionsFolder) {
+        const sessionRef = db().ref(session);
+        if (index != 0) {
+          sessionRef.remove();
+          console.log(`File ${session} deleted successfully.`);
+        }
+
+        index++;
+      }
+    } catch (error) {
+      console.error("Error deleting files:", error);
+    }
+  };
+
+  // Usage example
+  const folderPaths = ["/users/123/folder1", "/users/123/folder2"];
+  deleteAllFilesInFolder(folderPaths);
+};
 export default Profile;
 
 const styles = StyleSheet.create({

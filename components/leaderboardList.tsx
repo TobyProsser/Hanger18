@@ -41,13 +41,13 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
     if (snapshot.val()) {
       const values: FeedClimb[] = snapshot.val();
       if (values) {
-        const spacerValue: FeedClimb = {
+        const spacer: FeedClimb = {
           key: "spacer",
           allGrades: "",
           currentUser: "",
           climbingGym: "",
         };
-        setLeaderboard([...values, spacerValue]);
+        setLeaderboard([spacer, spacer, ...values, spacer]);
       }
     } else {
       setLeaderboard([]);
@@ -79,14 +79,13 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         }
       });
 
-      setLeaderboard([...values, spacerValue]);
+      setLeaderboard([spacerValue, ...values, spacerValue]);
     } catch (error) {
       console.log(error);
     }
   };
 
   const retrieveMore = async () => {
-    console.log("Retrieving more data");
     try {
       const lastVisibleKey = leaderboard[leaderboard.length - 1]?.key;
       if (!lastVisibleKey) return; // No more items to load
@@ -193,24 +192,22 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
             });
 
             return item.key != "spacer" ? (
-              <TouchableOpacity
-                onPress={() => {
-                  if (!isScrolling) {
-                    console.log("current User: " + item.currentUser);
-                    prop.onPress(item.currentUser);
-                  } else {
-                    console.log("scrolling");
-                  }
-                }}
-                activeOpacity={0.8}
+              <Animated.View
+                style={[
+                  styles.parentContainerStyle,
+                  //{ opacity, transform: [{ scale }] },
+                ]}
               >
-                <Animated.View
-                  style={[
-                    styles.parentContainerStyle,
-                    //{ opacity, transform: [{ scale }] },
-                  ]}
-                >
-                  <View style={styles.centerAlign}>
+                <View style={styles.centerAlign}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (!isScrolling) {
+                        console.log("current User: " + item.currentUser);
+                        prop.onPress(item.currentUser);
+                      }
+                    }}
+                    activeOpacity={0.8}
+                  >
                     <View style={styles.placerItemContainter}>
                       <PlacerColorItem index={index} />
                     </View>
@@ -244,11 +241,11 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                         </View>
                       </View>
                     </View>
-                  </View>
-                </Animated.View>
-              </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
             ) : (
-              <View style={{ height: 250 }} />
+              <View style={{ height: 200 }} />
             );
           }}
         />
@@ -331,6 +328,5 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     overflow: "hidden",
     height: 100,
-    top: 200,
   },
 });
