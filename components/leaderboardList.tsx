@@ -65,7 +65,13 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
 
       const values: FeedClimb[] = [];
       const spacerValue: FeedClimb = {
-        key: "spacer",
+        key: "spacer" + Date.now(),
+        allGrades: "",
+        currentUser: "",
+        climbingGym: "",
+      };
+      const spacerValue1: FeedClimb = {
+        key: "spacer1" + Date.now(),
         allGrades: "",
         currentUser: "",
         climbingGym: "",
@@ -79,7 +85,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         }
       });
 
-      setLeaderboard([spacerValue, ...values, spacerValue]);
+      setLeaderboard([spacerValue, ...values, spacerValue1]);
     } catch (error) {
       console.log(error);
     }
@@ -108,7 +114,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
       });
 
       const spacerValue: FeedClimb = {
-        key: "spacer",
+        key: "spacer" + Date.now(),
         allGrades: "",
         currentUser: "",
         climbingGym: "",
@@ -153,6 +159,20 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   //   //return () => db().ref(refPath).off("value", onLeaderboardChange);
   // }, [selectedLocation]);
 
+  const leaderboardGradesText = (grades) => {
+    let newString = "";
+    console.log(grades[0]);
+    if (grades[0] == "[") {
+      newString = grades.substring(15);
+      console.log("new" + newString);
+    } else {
+      newString = grades;
+    }
+    newString =
+      newString.length >= 16 ? newString.slice(0, 16) + " ..." : newString;
+
+    return newString;
+  };
   return (
     <View style={styles.container}>
       <View style={{ flex: 0.65, top: 260 }}>
@@ -191,7 +211,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
               outputRange: [1, 1, 1, 0],
             });
 
-            return item.key != "spacer" ? (
+            return !item.key.includes("spacer") ? (
               <Animated.View
                 style={[
                   styles.parentContainerStyle,
@@ -209,7 +229,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                     activeOpacity={0.8}
                   >
                     <View style={styles.placerItemContainter}>
-                      <PlacerColorItem index={index} />
+                      <PlacerColorItem index={index - 1} />
                     </View>
 
                     <View style={styles.contentContainer}>
@@ -233,10 +253,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                         <View style={styles.line}></View>
                         <View style={styles.textSpacing}>
                           <Text style={styles.text}>
-                            {" "}
-                            {item.allGrades.length >= 16
-                              ? item.allGrades.slice(0, 16) + " ..."
-                              : item.allGrades}
+                            {leaderboardGradesText(item.allGrades)}
                           </Text>
                         </View>
                       </View>
@@ -284,7 +301,7 @@ const styles = StyleSheet.create({
   },
   placerItemContainter: {
     top: -10,
-    right: -10,
+    right: -30,
     alignSelf: "flex-end",
     alignContent: "flex-start",
     borderRadius: 18,

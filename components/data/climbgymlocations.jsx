@@ -1,11 +1,19 @@
 const businessLocations = [
   {
-    name: "Hanger18, MV",
+    name: "Mission",
     latitude: 33.617360332623875,
     longitude: -117.68237815378937,
   },
-  { name: "Business B", latitude: 34.0522, longitude: -118.2437 },
-  // Add more business locations...
+  {
+    name: "Orange",
+    latitude: 33.806618670400795,
+    longitude: -117.86909667040194,
+  },
+  {
+    name: "San Clemente",
+    latitude: 33.45349661108663,
+    longitude: -117.60107071962928,
+  },
 ];
 
 export default businessLocations;

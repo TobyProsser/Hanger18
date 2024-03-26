@@ -157,9 +157,24 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log("Closest business:", closestBusiness.name);
       console.log("Distance:", minDistance, "meters");
 
-      if (minDistance > 2) {
+      //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
+      if (minDistance < 2) {
         Alert.alert(
-          `You are not close enough to a registered gym to submit climb. You are ${minDistance} km away`
+          "No gym Found",
+          `You are not close enough to a registered gym to submit climb. You are ${minDistance.toPrecision(
+            2
+          )} km away`,
+          [
+            { text: "Okay", onPress: () => console.log("OkayPressed") },
+            {
+              text: "Register",
+              onPress: () =>
+                Alert.alert(
+                  "Register Gym",
+                  "Please have the Gym Manager contact FathomCreative.contact@gmail.com"
+                ),
+            },
+          ]
         );
         return "null";
       }
@@ -220,7 +235,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
     const { leaderboardIndex } = await findLeaderboardIndex(userName);
     await db()
-      .ref(`/users/${currentUser}/${selectedLocation}/lbIndex`)
+      .ref(`/users/${currentUser}/${selectedLocation}`)
       .update({ lbIndex: leaderboardIndex });
   };
 
@@ -247,16 +262,14 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const user = await db().ref(`/users/${currentUser}`).once("value");
     const userName = user.val().name as string;
     //Get profileImage
-    const data = await db()
-      .ref(`/users/${currentUser}/profileImage`)
-      .once("value");
-    const profileImage = data.val().profileImageUri;
+    const data = await db().ref(`/users/${currentUser}`).once("value");
+    const profileImage = data.val().profileImage;
     //Calculate total grade
-    const totalGradePath = `/users/${currentUser}/${selectedLocation}/leaderboard/`;
+    const totalGradePath = `/users/${currentUser}/${selectedLocation}`;
     const gradesSnapshot = await db().ref(totalGradePath).once("value");
     const totalGrades = (gradesSnapshot.val().totalScore as number) + newgrade;
     //get ClimbsAmount from database
-    const climbsAmountPath = `/users/${currentUser}/${selectedLocation}/climbsAmount`;
+    const climbsAmountPath = `/users/${currentUser}/${selectedLocation}`;
     let climbsAmount = 0;
 
     try {
@@ -450,7 +463,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         climbingGym: selectedLocation,
       });
     //get allGrades from database
-    const allGradesPath = `/users/${currentUser}/${selectedLocation}/allGrades`;
+    const allGradesPath = `/users/${currentUser}/${selectedLocation}`;
     const allGradesSnapshot = await db().ref(allGradesPath).once("value");
     let allGrades = allGradesSnapshot.val().allGrades as string;
     //Update allGrades

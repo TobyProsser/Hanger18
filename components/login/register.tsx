@@ -32,25 +32,14 @@ export const Register = () => {
   const nav = useNavigation<NativeStackNavigationProp<any>>();
 
   const createProfile = async (response: any) => {
-    db().ref(`/users/${response.user.uid}`).set({ name });
     db()
-      .ref(`/users/${response.user.uid}/profileImage`)
-      .set({ profileImageUri });
-
+      .ref(`/users/${response.user.uid}`)
+      .set({ name: name, profileImage: profileImageUri, admin: false });
+    console.log("set name: " + name + ", set Image: " + profileImageUri);
     for (const gym of businessLocations) {
       db()
-        .ref(`/users/${response.user.uid}/${gym.name}/leaderboard`)
-        .set({ totalScore: 0 });
-      db()
-        .ref(`/users/${response.user.uid}/${gym.name}/lbIndex`)
-        .set({ lbIndex: 0 });
-      db()
-        .ref(`/users/${response.user.uid}/${gym.name}/climbsAmount`)
-        .set({ climbsAmount: 0 });
-      db()
-        .ref(`/users/${response.user.uid}/${gym.name}/allGrades`)
-        .set({ allGrades: "" });
-      db().ref(`/users/${response.user.uid}`).set({ admin: false });
+        .ref(`/users/${response.user.uid}/${gym.name}`)
+        .set({ totalScore: 0, allGrades: "", lbIndex: 0, climbsAmount: 0 });
 
       console.log("gym name: " + gym.name);
     }
@@ -102,7 +91,6 @@ export const Register = () => {
           //Save an empty climb, this acts as the adding button at the end of the climbs list
           if (currentUser) {
             await saveClimb(0, "null", "null", "Adder", currentUser.uid);
-            console.log("CLimbSaved");
           }
           nav.replace("Home");
         }
@@ -139,7 +127,7 @@ export const Register = () => {
               placeholder="Display Name"
               value={name}
               onChangeText={setName}
-              maxLength={8}
+              maxLength={13}
             />
             <TextInput
               style={styles.loginTextField}

@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
   TextInput,
+  Text,
   Pressable,
   Keyboard,
   Alert,
@@ -50,7 +51,19 @@ export const Login = () => {
       <SafeAreaView style={styles.contentView}>
         <View style={styles.container}>
           <View style={styles.titleContainer}>
-            <Image source={{ uri: logo }} style={StyleSheet.absoluteFill} />
+            {/*<Image source={{ uri: logo }} style={StyleSheet.absoluteFill} />*/}
+            <Image
+              style={{
+                backgroundColor: "#6aafdf",
+                width: 150,
+                height: 150,
+                borderRadius: 50,
+                top: 20,
+                alignSelf: "center",
+              }}
+              source={require("../../assets/climbingLogo.png")}
+            />
+            <Text style={[{ top: 30 }, styles.titleText]}>Climber</Text>
           </View>
           <View style={styles.mainContent} />
           <View style={styles.bottomAdjustment}>

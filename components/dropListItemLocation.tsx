@@ -79,7 +79,14 @@ const DropListItemLocation: React.FC<DropListItemLocationProps> = ({
       ]}
     >
       <View style={styles.container}>
-        <Text style={styles.label}>{label}</Text>
+        <Text
+          style={[
+            styles.label,
+            { fontSize: label ? (label.length >= 10 ? 18 : 22) : 22 },
+          ]}
+        >
+          {label}
+        </Text>
       </View>
     </Animated.View>
   );
