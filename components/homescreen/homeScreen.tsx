@@ -36,7 +36,7 @@ export default function HomeScreen() {
   );
 
   const [sessionScrollTo, setSessionScrollTo] = useState(0);
-
+  const [lbScrollTo, setLBScrollTo] = useState(0);
   const [header, setHeader] = useState({ label: options[0].label });
 
   useEffect(() => {
@@ -68,6 +68,8 @@ export default function HomeScreen() {
       value={{
         sessionScrollTo,
         setSessionScrollTo,
+        lbScrollTo,
+        setLBScrollTo,
         selectedLocation,
         setSelectedLocation,
       }}
@@ -75,7 +77,7 @@ export default function HomeScreen() {
       <GestureHandlerRootView style={styles.container}>
         <View style={styles.wrapper}>
           <Profile onPress={onPress} />
-          <LeaderboardList onPress={onPress} />
+          <LeaderboardList onPress={onPress} lbScrollTo={lbScrollTo} />
           <DropdownForm
             ref={ref}
             onToggle={() => toggleActivateFormTouch}

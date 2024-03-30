@@ -97,7 +97,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
 
-  const { selectedLocation, setSelectedLocation } = useLocationContext();
+  const { selectedLocation, setSelectedLocation, setLBScrollTo } =
+    useLocationContext();
 
   useEffect(() => {
     console.log("loading: " + loading);
@@ -158,7 +159,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log("Distance:", minDistance, "meters");
 
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
-      if (minDistance < 2) {
+      if (minDistance > 0.25) {
         Alert.alert(
           "No gym Found",
           `You are not close enough to a registered gym to submit climb. You are ${minDistance.toPrecision(
@@ -250,7 +251,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const leaderboardIndex = allValues.findIndex(
       (value) => value.name === userName
     );
-
+    //Scroll to users place on leaderboard
+    setLBScrollTo(leaderboardIndex);
     return { leaderboardIndex, allValues };
   };
 

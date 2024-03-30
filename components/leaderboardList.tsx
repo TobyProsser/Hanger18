@@ -1,6 +1,6 @@
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
 import React, { useEffect, useState, useContext, useRef } from "react";
-import { Dimensions, TouchableOpacity } from "react-native";
+import { Dimensions, FlatList, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
 import db from "@react-native-firebase/database";
@@ -24,6 +24,7 @@ var scale = 1;
 
 interface ILeaderbaordProps {
   onPress: (currentUser) => void;
+  lbScrollTo: number;
 }
 
 const LeaderboardList = (prop: ILeaderbaordProps) => {
@@ -31,10 +32,20 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   const [leaderboard, setLeaderboard] = useState<FeedClimb[]>([]);
   const [isScrolling, setIsScrolling] = useState(false);
   const [prevLocation, setPrevLocation] = useState("");
-  const { selectedLocation, setSelectedLocation } = useLocationContext();
+  const { selectedLocation, lbScrollTo, setSelectedLocation } =
+    useLocationContext();
 
   const [loadedItems, setLoadedItems] = useState(7); // Initial number of items to load
 
+  const flatListRef = React.useRef<FlatList>(null);
+
+  const scrollToUserIndex = () => {
+    if ((flatListRef.current as any).length > lbScrollTo) {
+      flatListRef.current.scrollToIndex({ animated: true, index: lbScrollTo });
+    }
+
+    console.log("lbScrollTo: " + lbScrollTo);
+  };
   const onLeaderboardChange = (
     snapshot: FirebaseDatabaseTypes.DataSnapshot
   ) => {
@@ -140,24 +151,8 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
       }
     }
     retrieveData(refPath);
-  }, [selectedLocation]);
-
-  // useEffect(() => {
-  //   let refPath = "";
-  //   if (selectedLocation) {
-  //     refPath = `/leaderboards/${selectedLocation}/leaderboard`;
-  //     setPrevLocation(selectedLocation);
-  //   } else {
-  //     if (prevLocation) {
-  //       refPath = `/leaderboards/${prevLocation}/leaderboard`;
-  //     } else {
-  //       refPath = `/leaderboards/${businessLocations[0].name}/leaderboard`;
-  //     }
-  //   }
-  //   db().ref(refPath).on("value", onLeaderboardChange);
-  //   //Causing error
-  //   //return () => db().ref(refPath).off("value", onLeaderboardChange);
-  // }, [selectedLocation]);
+    scrollToUserIndex();
+  }, [selectedLocation, lbScrollTo]);
 
   const leaderboardGradesText = (grades) => {
     let newString = "";
@@ -177,6 +172,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
     <View style={styles.container}>
       <View style={{ flex: 0.65, top: 260 }}>
         <Animated.FlatList
+          ref={flatListRef}
           data={leaderboard.slice(0, loadedItems)}
           onEndReached={() => {
             retrieveMore;

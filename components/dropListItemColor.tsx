@@ -123,6 +123,10 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
 
           width: DropListItemWidth,
           height: DropListItemHeight,
+          shadowColor: "#FFFFFF", // White shadow color
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.25,
+          shadowRadius: 6,
         },
         rStyle,
       ]}
