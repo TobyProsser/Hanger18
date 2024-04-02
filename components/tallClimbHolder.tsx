@@ -27,6 +27,7 @@ import * as TaskManager from "expo-task-manager";
 import businessLocations from "./data/climbgymlocations";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
+import firebase from "./data/firebase";
 
 import Animated, {
   useAnimatedStyle,
@@ -159,7 +160,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log("Distance:", minDistance, "meters");
 
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
-      if (minDistance > 0.25) {
+      if (minDistance < 0.25) {
         Alert.alert(
           "No gym Found",
           `You are not close enough to a registered gym to submit climb. You are ${minDistance.toPrecision(
@@ -350,6 +351,34 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }
   };
 
+  const UploadToStorageReturnUrl = async (uri: string): Promise<string> => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const currentUser = await auth().currentUser;
+
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(
+          `images/${currentUser.uid}/${selectedLocation}/${
+            currentUser.uid + Date.now()
+          }.jpg`
+        );
+      const snapshot = await ref.put(blob);
+
+      // Get the download URL for the uploaded image
+      const downloadURL = await snapshot.ref.getDownloadURL();
+      console.log("Image download URL:", downloadURL);
+
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading image to Firebase storage:", error);
+      throw error;
+    }
+  };
+
   const takeImage = async (replacing: boolean) => {
     if (!cameraPermission) {
       requestPermissions();
@@ -366,15 +395,19 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       quality: 1,
     }).then(async (response) => {
       if (!response.canceled) {
-        prop.setImageUri(response.assets[0].uri);
         setLoading(true);
+        const uri = response.assets[0].uri;
+
+        const imageUrl = await UploadToStorageReturnUrl(uri);
+        prop.setImageUri(imageUrl);
+
         const gym = await findClimbingGym();
         if (gym != "null") {
           climbingGym.value = gym;
           setSelectedLocation(gym);
           console.log("awaited for: " + gym);
 
-          submitClimb(-1, "null", response.assets[0].uri, gym);
+          submitClimb(-1, "null", imageUrl, gym);
         } else {
           setLoading(false);
         }

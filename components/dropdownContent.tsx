@@ -37,13 +37,13 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
       setLimit(10);
     }
   };
-
+  //scroll to start
   React.useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
     }
   }, [curSessionId]);
-
+  //Scroll Content
   React.useEffect(() => {
     if (sessionScrollTo == 10) {
       addButtonScroll();

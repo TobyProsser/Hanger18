@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
+import firebase from "../data/firebase";
 
 import businessLocations from "../data/climbgymlocations";
 
@@ -30,6 +31,34 @@ export const Register = () => {
   const [profileImageUri, setProfileImageUri] = useState<string | undefined>();
 
   const nav = useNavigation<NativeStackNavigationProp<any>>();
+
+  const UploadToStorageReturnUrl = async (uri: string): Promise<string> => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const currentUser = await auth().currentUser;
+
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(
+          `images/${currentUser.uid}/profilePic/${
+            currentUser.uid + Date.now()
+          }.jpg`
+        );
+      const snapshot = await ref.put(blob);
+
+      // Get the download URL for the uploaded image
+      const downloadURL = await snapshot.ref.getDownloadURL();
+      console.log("Image download URL:", downloadURL);
+
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading image to Firebase storage:", error);
+      throw error;
+    }
+  };
 
   const createProfile = async (response: any) => {
     db()
@@ -91,6 +120,10 @@ export const Register = () => {
           //Save an empty climb, this acts as the adding button at the end of the climbs list
           if (currentUser) {
             await saveClimb(0, "null", "null", "Adder", currentUser.uid);
+            const imageUrl = await UploadToStorageReturnUrl(profileImageUri);
+            db()
+              .ref(`/users/${response.user.uid}`)
+              .update({ profileImage: imageUrl });
           }
           nav.replace("Home");
         }
@@ -110,7 +143,9 @@ export const Register = () => {
     });
 
     if (!result.canceled) {
-      setProfileImageUri(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+
+      setProfileImageUri(uri);
     }
   };
 

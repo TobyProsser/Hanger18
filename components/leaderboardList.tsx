@@ -68,12 +68,6 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
 
   const retrieveData = async (refPath: string) => {
     try {
-      const snapshot = await db()
-        .ref(refPath)
-        .orderByKey()
-        .limitToLast(loadedItems)
-        .once("value");
-
       const values: FeedClimb[] = [];
       const spacerValue: FeedClimb = {
         key: "spacer" + Date.now(),
@@ -87,12 +81,21 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         currentUser: "",
         climbingGym: "",
       };
+
+      const snapshot = await db()
+        .ref(refPath)
+        .orderByKey()
+        .limitToLast(loadedItems)
+        .once("value");
+
+      console.log("snapshot: " + snapshot.numChildren());
       snapshot.forEach((childSnapshot) => {
         const value = childSnapshot.val();
+        console.log("value: " + value);
         if (value) {
           values.push(value);
         } else {
-          return true;
+          return null;
         }
       });
 
@@ -103,9 +106,12 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   };
 
   const retrieveMore = async () => {
+    console.log("retrieve more");
     try {
       const lastVisibleKey = leaderboard[leaderboard.length - 1]?.key;
       if (!lastVisibleKey) return; // No more items to load
+
+      await setLoadedItems(loadedItems + 7);
 
       const additionalSnapshot = await db()
         .ref(`/leaderboards/${selectedLocation}/leaderboard`)
@@ -120,7 +126,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         if (value) {
           additionalValues.push(value);
         } else {
-          return true;
+          return null;
         }
       });
 
@@ -156,7 +162,6 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
 
   const leaderboardGradesText = (grades) => {
     let newString = "";
-    console.log(grades[0]);
     if (grades[0] == "[") {
       newString = grades.substring(15);
       console.log("new" + newString);
@@ -168,6 +173,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
 
     return newString;
   };
+
   return (
     <View style={styles.container}>
       <View style={{ flex: 0.65, top: 260 }}>
@@ -175,7 +181,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
           ref={flatListRef}
           data={leaderboard.slice(0, loadedItems)}
           onEndReached={() => {
-            retrieveMore;
+            retrieveMore();
           }}
           onScrollBeginDrag={() => setIsScrolling(true)}
           onScrollEndDrag={() => {
