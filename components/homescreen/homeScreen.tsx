@@ -16,6 +16,7 @@ import DropdownLocation from "../dropListLocation";
 import businessLocations from "../data/climbgymlocations";
 import { runOnJS, useSharedValue } from "react-native-reanimated";
 import { LocationContext } from "../context/locationcontext";
+import externalStyles from "../styles/styles";
 const { height: SCREENHEIGHT } = Dimensions.get("screen");
 const logo =
   "https://climbhangar18.com/wp-content/uploads/2020/06/hangar-4-color-logo.png";
@@ -75,7 +76,7 @@ export default function HomeScreen() {
       }}
     >
       <GestureHandlerRootView style={styles.container}>
-        <View style={styles.wrapper}>
+        <View style={[styles.wrapper, externalStyles.secondColor]}>
           <Profile onPress={onPress} />
           <LeaderboardList onPress={onPress} lbScrollTo={lbScrollTo} />
           <DropdownForm
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     flexDirection: "column",
-    backgroundColor: "#2a3641",
+
     gap: -30,
   },
   topAdjustment: { top: 225 },

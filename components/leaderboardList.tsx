@@ -11,6 +11,7 @@ import { useLocationContext } from "./context/locationcontext";
 
 import businessLocations from "./data/climbgymlocations";
 import leaderboardItem from "./leaderboardItem";
+import externalStyles from "./styles/styles";
 
 const unsetProfileImage =
   "https://simplyilm.com/wp-content/uploads/2017/08/temporary-profile-placeholder-1.jpg";
@@ -217,6 +218,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
               <Animated.View
                 style={[
                   styles.parentContainerStyle,
+                  externalStyles.mainColor,
                   //{ opacity, transform: [{ scale }] },
                 ]}
               >
@@ -337,7 +339,6 @@ const styles = StyleSheet.create({
   parentContainerStyle: {
     marginBottom: SPACING + 2.5,
     borderRadius: 18,
-    backgroundColor: "#6aafdf",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

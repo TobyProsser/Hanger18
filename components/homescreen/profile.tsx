@@ -9,6 +9,7 @@ import { StyleSheet, Text, View, Image, Dimensions, Alert } from "react-native";
 import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 import { useLocationContext } from "../context/locationcontext";
+import externalStyles from "../styles/styles";
 
 //import LocationContext from "../context/locationcontext";
 
@@ -154,7 +155,7 @@ const Profile = (prop: IProfileProps) => {
     }
   };
   return (
-    <View style={styles.profileContainer}>
+    <View style={[styles.profileContainer, externalStyles.mainColor]}>
       <View style={{ justifyContent: "flex-end" }}>
         {admin ? (
           <View
@@ -197,7 +198,7 @@ const Profile = (prop: IProfileProps) => {
         }}
       >
         <View
-          style={styles.button}
+          style={[styles.button, externalStyles.thirdColor]}
           onTouchEnd={() => {
             handleClick();
             setSessionScrollTo(10);
@@ -240,7 +241,6 @@ const styles = StyleSheet.create({
   heightAdjustment: { height: 38 },
   column: { flexDirection: "column", alignItems: "center", top: -110 },
   button: {
-    backgroundColor: "#f4e24d",
     borderRadius: 20,
     width: 75,
     height: 50,
@@ -298,7 +298,6 @@ const styles = StyleSheet.create({
     width: "100%",
     position: "absolute",
     height: 396,
-    backgroundColor: "#6aafdf",
     alignItems: "center",
     justifyContent: "flex-start",
     elevation: 5, // For shadow on Android

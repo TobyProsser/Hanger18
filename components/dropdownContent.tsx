@@ -35,6 +35,8 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
       values.sort((a, b) => b.date - a.date);
       setFeed([...values]);
       setLimit(10);
+
+      console.log("Climbs Length: " + values.length);
     }
   };
   //scroll to start
@@ -66,6 +68,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   useEffect(() => {
     if (currentUser && !currentUser.includes("[")) {
       try {
+        console.log("SElected location: " + selectedLocation);
         const refPath = `/users/${currentUser}/${selectedLocation}/sessions`;
         db()
           .ref(refPath)
@@ -74,7 +77,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
           .on("value", onClimbChange);
 
         checkIfCurrentUser();
-        return db().ref(refPath).off("value", onClimbChange);
+        //return db().ref(refPath).off("value", onClimbChange);
       } catch (e) {
         console.log("Current User in dropdown content error: " + e.error);
       }

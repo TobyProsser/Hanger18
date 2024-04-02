@@ -5,9 +5,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Color from "color";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import businessLocations from "./data/climbgymlocations";
+import externalStyles from "./styles/styles";
 
 type DropListItemLocationType = {
   label: string;
@@ -40,7 +41,7 @@ const DropListItemLocation: React.FC<DropListItemLocationProps> = ({
   const expandedScale = 1;
   const collapsedScale = 1;
 
-  const expandedBackgroundColor = "#6aafdf";
+  const expandedBackgroundColor = externalStyles.mainColor.backgroundColor;
   const colapsedBackgroundColor = Color(expandedBackgroundColor)
     .lighten(index * 0.25)
     .hex();
@@ -66,7 +67,10 @@ const DropListItemLocation: React.FC<DropListItemLocationProps> = ({
       onTouchEnd={async () => {
         isExpanded.value = !isExpanded.value;
         const names = await businessLocations.map((location) => location.name);
-        setSelectedLocation(names[index - 1]);
+        if (index > 0) {
+          const newIndex = index - 1;
+          setSelectedLocation(names[newIndex]);
+        }
       }}
       style={[
         styles.animatedView,
@@ -106,6 +110,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 22,
     textTransform: "uppercase",
+    fontWeight: "400",
     letterSpacing: 1.2,
   },
 });
