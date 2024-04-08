@@ -162,7 +162,7 @@ export const Register = () => {
               placeholder="Display Name"
               value={name}
               onChangeText={setName}
-              maxLength={13}
+              maxLength={11}
             />
             <TextInput
               style={styles.loginTextField}

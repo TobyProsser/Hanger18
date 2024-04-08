@@ -10,6 +10,7 @@ import auth from "@react-native-firebase/auth";
 import db from "@react-native-firebase/database";
 import { useLocationContext } from "../context/locationcontext";
 import externalStyles from "../styles/styles";
+import Icon from "react-native-vector-icons/FontAwesome"; // Example: Using FontAwesome icons
 
 //import LocationContext from "../context/locationcontext";
 
@@ -36,7 +37,7 @@ const Profile = (prop: IProfileProps) => {
     if (currentUser) {
       db()
         .ref(`/users/${currentUser.uid}`)
-        .once("value", (snapshot) => {
+        .on("value", (snapshot) => {
           const data = snapshot.val();
           if (data) {
             const profileImage = data.profileImage;
@@ -70,16 +71,20 @@ const Profile = (prop: IProfileProps) => {
     return () => {
       const currentUser = auth().currentUser;
       if (currentUser) {
-        db().ref(`/users/${currentUser.uid}`).off();
+        //db().ref(`/users/${currentUser.uid}`).off();
         db().ref(`/users/${currentUser.uid}/${selectedLocation}`).off();
       }
     };
   }, [selectedLocation]);
 
-  const handleClick = async () => {
-    const currentUser = await auth().currentUser;
-    if (currentUser) {
-      prop.onPress(currentUser.uid);
+  const handleClick = async (edit?: boolean) => {
+    if (edit) {
+      prop.onPress("edit");
+    } else {
+      const currentUser = await auth().currentUser;
+      if (currentUser) {
+        prop.onPress(currentUser.uid);
+      }
     }
   };
 
@@ -198,9 +203,22 @@ const Profile = (prop: IProfileProps) => {
         }}
       >
         <View
+          style={{
+            padding: 10,
+            position: "absolute",
+            marginLeft: 30,
+            marginTop: 50,
+          }}
+          onTouchEnd={() => {
+            handleClick(true);
+          }}
+        >
+          <Icon name="pencil" size={40} color="white" />
+        </View>
+        <View
           style={[styles.button, externalStyles.thirdColor]}
           onTouchEnd={() => {
-            handleClick();
+            handleClick(false);
             setSessionScrollTo(10);
           }}
         >
@@ -210,7 +228,7 @@ const Profile = (prop: IProfileProps) => {
       <View style={styles.column}>
         <View
           style={styles.profileImageContainer}
-          onTouchEnd={() => handleClick()}
+          onTouchEnd={() => handleClick(false)}
         >
           <Image source={{ uri: profileImage }} style={styles.image} />
         </View>
