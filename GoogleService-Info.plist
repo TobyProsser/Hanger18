@@ -26,5 +26,9 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:884917092791:ios:78e7d8806a27d170d5a832</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take photos of the climbs.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow ClimberLB to use your location to confirm you are at a climbing gym when submitting climbs.</string>
 </dict>
 </plist>

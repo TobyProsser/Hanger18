@@ -189,14 +189,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const requestPermissions = async () => {
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      console.log("status lib", status);
-      setGalleryPermission(status === "granted");
-    } catch (error) {
-      console.log("error", error);
-    }
-    try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       console.log("status camera", status);
       setCameraPermission(status === "granted");
