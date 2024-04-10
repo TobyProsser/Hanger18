@@ -396,13 +396,13 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     }).then(async (response) => {
       if (!response.canceled) {
         setLoading(true);
-        const uri = response.assets[0].uri;
-
-        const imageUrl = await UploadToStorageReturnUrl(uri);
-        prop.setImageUri(imageUrl);
 
         const gym = await findClimbingGym();
         if (gym != "null") {
+          const uri = response.assets[0].uri;
+
+          const imageUrl = await UploadToStorageReturnUrl(uri);
+          prop.setImageUri(imageUrl);
           climbingGym.value = gym;
           setSelectedLocation(gym);
           console.log("awaited for: " + gym);
