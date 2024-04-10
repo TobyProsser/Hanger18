@@ -543,7 +543,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   };
   const handlePressOut = () => {
     const touchDuration = Date.now() - touchStartTime;
-    if (touchDuration >= 500) {
+    if (touchDuration >= 500 && prop.isUsersClimbs) {
       // Long press detected (duration >= 1000 milliseconds)
       Alert.alert(
         "Replace Climb",

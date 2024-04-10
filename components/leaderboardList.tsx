@@ -36,13 +36,14 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   const { selectedLocation, lbScrollTo, setSelectedLocation } =
     useLocationContext();
 
-  const [loadedItems, setLoadedItems] = useState(7); // Initial number of items to load
+  const [loadedItems, setLoadedItems] = useState(300); // Initial number of items to load
 
   const flatListRef = React.useRef<FlatList>(null);
 
   const scrollToUserIndex = () => {
     if ((flatListRef.current as any).length > lbScrollTo) {
       flatListRef.current.scrollToIndex({ animated: true, index: lbScrollTo });
+      console.log("SCROLL TO" + lbScrollTo);
     }
 
     console.log("lbScrollTo: " + lbScrollTo);
@@ -92,10 +93,12 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
       console.log("snapshot: " + snapshot.numChildren());
       snapshot.forEach((childSnapshot) => {
         const value = childSnapshot.val();
-        console.log("value: " + value);
+
         if (value) {
           values.push(value);
+          console.log("pushed value: " + value.name);
         } else {
+          console.log("pushed value: null");
           return null;
         }
       });
@@ -107,7 +110,6 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   };
 
   const retrieveMore = async () => {
-    console.log("retrieve more");
     try {
       const lastVisibleKey = leaderboard[leaderboard.length - 1]?.key;
       if (!lastVisibleKey) return; // No more items to load
@@ -127,7 +129,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         if (value) {
           additionalValues.push(value);
         } else {
-          return null;
+          return true;
         }
       });
 
@@ -145,7 +147,7 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
     }
   };
 
-  useEffect(() => {
+  const getRefPath = () => {
     let refPath = "";
     if (selectedLocation) {
       refPath = `/leaderboards/${selectedLocation}/leaderboard`;
@@ -157,7 +159,12 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         refPath = `/leaderboards/${businessLocations[0].name}/leaderboard`;
       }
     }
-    retrieveData(refPath);
+    console.log("refPath: " + refPath);
+    return refPath;
+  };
+
+  useEffect(() => {
+    retrieveData(getRefPath());
     scrollToUserIndex();
   }, [selectedLocation, lbScrollTo]);
 

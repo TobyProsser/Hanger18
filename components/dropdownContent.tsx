@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   Alert,
+  BackHandler,
 } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
@@ -101,7 +102,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
       await user.delete();
 
       console.log("User account deleted successfully");
-
+      BackHandler.exitApp();
       // Call this function to restart the app
       //RNRestart.Restart();
     } catch (error) {
