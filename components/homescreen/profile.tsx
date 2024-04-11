@@ -109,6 +109,7 @@ const Profile = (prop: IProfileProps) => {
         console.log("Item keys:", userKeys);
 
         deleteAllFilesInFolder(userKeys);
+        deleteLeaderboard();
       })
       .catch((error) => {
         console.error("Error retrieving data:", error);
@@ -117,7 +118,6 @@ const Profile = (prop: IProfileProps) => {
 
   const deleteAllFilesInFolder = async (userKeys) => {
     try {
-      let index = 0;
       for (const user of userKeys) {
         const sessions = await db().ref(
           `/users/${user}/${selectedLocation}/sessions`
@@ -138,22 +138,54 @@ const Profile = (prop: IProfileProps) => {
     }
   };
 
-  const deleteSessions = async (user, sessionKeys) => {
-    try {
-      for (const session of sessionKeys) {
-        const sessionRef = db().ref(
-          `users/${user}/${selectedLocation}/sessions/${session}`
-        );
-        const snapshot = await sessionRef.once("value");
+  const deleteLeaderboard = async () => {
+    const leaderboard = await db().ref(
+      `/leaderboards/${selectedLocation}/leaderboard/`
+    );
+    leaderboard
+      .once("value")
+      .then((snapshot) => {
         const data = snapshot.val();
         if (data) {
-          const imageUri = data.imageUri;
-          console.log("Image URI: " + imageUri);
-          if (imageUri != "null") {
-            sessionRef.remove();
-            console.log(`File ${sessionRef} deleted successfully.`);
-          }
+          leaderboard.remove();
+          console.log(`File ${leaderboard} deleted successfully.`);
         }
+      })
+      .catch((error) => {
+        console.error("Error retrieving data:", error);
+      });
+  };
+
+  const deleteSessions = async (user, sessionKeys) => {
+    try {
+      let index = 0;
+      const sessionRef = db().ref(`users/${user}/${selectedLocation}`).update({
+        allGrades: "",
+        climbsAmount: 0,
+        lbIndex: 0,
+        totalScore: 0,
+      });
+
+      console.log("Sessions amount: " + user + ", " + sessionKeys);
+      for (const session of sessionKeys) {
+        if (index != 0) {
+          const sessionRef = db().ref(
+            `users/${user}/${selectedLocation}/sessions/${session}`
+          );
+          sessionRef.once("value").then((snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+              sessionRef.remove();
+              console.log(`File ${sessionRef} deleted successfully.`);
+            }
+          });
+        } else {
+          const sessionRef = db()
+            .ref(`users/${user}/${selectedLocation}/sessions/${session}`)
+            .update({ imageUri: "null", color: "null", grade: "-1" });
+        }
+
+        index++;
       }
     } catch (error) {
       console.error("Error deleting files:", error);

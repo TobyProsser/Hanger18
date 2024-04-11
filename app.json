@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ClimberLB",
-    "slug": "ClimberLB",
+    "slug": "Hanger18",
     "version": "1.1.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,7 +18,7 @@
       "buildNumber": "6",
       "infoPlist": {
       "NSPhotoLibraryUsageDescription": "We need access to your photo library to select the profile image.",
-      "NSCameraUsageDescription": "We need access to your camera to take photos.",
+      "NSCameraUsageDescription": "We need access to your camera to take photos of the climbs.",
       "NSLocationWhenInUseUsageDescription": "Allow ClimberLB to ensure you are at a climbing gym when submitting a climb.",
       "UIBackgroundModes": ["fetch"]
       },
