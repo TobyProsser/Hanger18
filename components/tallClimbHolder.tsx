@@ -1,28 +1,17 @@
-import React, { useState, useEffect, Dispatch, useContext } from "react";
+import React, { useState, useEffect, Dispatch } from "react";
 import {
   StyleSheet,
   Text,
   View,
-  Image,
   ImageBackground,
-  Button,
-  PermissionsAndroid,
-  Permission,
-  Platform,
   Alert,
   ActivityIndicator,
 } from "react-native";
-import Color from "color";
-import ColorSelect from "./colorSelect";
 import Dropdown from "./dropList";
 import ColorDropdown from "./dropListColor";
-import {
-  GestureDetector,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 import * as Location from "expo-location";
-import * as TaskManager from "expo-task-manager";
 
 import businessLocations from "./data/climbgymlocations";
 import auth from "@react-native-firebase/auth";
@@ -34,11 +23,11 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
-  useAnimatedReaction,
 } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
 import { LeaderboardEntry } from "./types/leaderboardentry";
 import { useLocationContext } from "./context/locationcontext";
+import * as ImageManipulator from "expo-image-manipulator";
 const CARD_HOLDER_HEIGHT = 350;
 const CARD_HOLDER_WIDTH = 300;
 //https://runwildmychild.com/wp-content/uploads/2022/09/Indoor-Rock-Climbing-for-Kids-Climbing-Wall.jpg
@@ -231,6 +220,9 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     await db()
       .ref(`/users/${currentUser}/${selectedLocation}`)
       .update({ lbIndex: leaderboardIndex });
+
+    setLBScrollTo(leaderboardIndex);
+    console.log("SCROLLING TO " + leaderboardIndex + "On Leaderboard called");
   };
 
   const findLeaderboardIndex = async (userName: string) => {
@@ -245,7 +237,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       (value) => value.name === userName
     );
     //Scroll to users place on leaderboard
-    setLBScrollTo(leaderboardIndex);
+
     return { leaderboardIndex, allValues };
   };
 
@@ -384,7 +376,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.5,
     }).then(async (response) => {
       if (!response.canceled) {
         setLoading(true);
@@ -393,7 +385,14 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         if (gym != "null") {
           const uri = response.assets[0].uri;
 
-          const imageUrl = await UploadToStorageReturnUrl(uri);
+          // Compress the image
+          const compressedImage = await ImageManipulator.manipulateAsync(
+            uri,
+            [{ resize: { height: 800 } }], // Resize if needed
+            { compress: 0.8 } // Adjust compression quality
+          );
+
+          const imageUrl = await UploadToStorageReturnUrl(compressedImage.uri);
           prop.setImageUri(imageUrl);
           climbingGym.value = gym;
           setSelectedLocation(gym);
@@ -541,7 +540,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         "Replace Climb",
         "Are you sure you want to delete this climb and replace it with a new one?",
         [
-          { text: "No", onPress: () => console.log("Npo Pressed") },
+          {
+            text: "No",
+            onPress: () => {
+              console.log("Npo Pressed");
+            },
+          },
           { text: "Yes", onPress: () => takeImage(true) },
         ]
       );

@@ -43,6 +43,11 @@ export default function HomeScreen() {
   useEffect(() => {
     setHeader({ label: selectedLocation });
   }, [selectedLocation]);
+  useEffect(() => {
+    console.log(
+      "Main heard a call made to scroll leaderboard to: " + lbScrollTo
+    );
+  }, [lbScrollTo]);
 
   const toggleActivateFormTouch = useCallback(() => {
     "worklet";
@@ -78,7 +83,11 @@ export default function HomeScreen() {
       <GestureHandlerRootView style={styles.container}>
         <View style={[styles.wrapper, externalStyles.secondColor]}>
           <Profile onPress={onPress} />
-          <LeaderboardList onPress={onPress} lbScrollTo={lbScrollTo} />
+          <LeaderboardList
+            onPress={onPress}
+            lbScrollTo={lbScrollTo}
+            activateFormTouch={activateFormTouch}
+          />
           <DropdownForm
             ref={ref}
             onToggle={() => toggleActivateFormTouch}

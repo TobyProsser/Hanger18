@@ -25,6 +25,7 @@ var scale = 1;
 
 interface ILeaderbaordProps {
   onPress: (currentUser) => void;
+  activateFormTouch: boolean;
   lbScrollTo: number;
 }
 
@@ -164,9 +165,10 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
   };
 
   useEffect(() => {
+    console.log("getting data and scrolling to: " + lbScrollTo);
     retrieveData(getRefPath());
-    scrollToUserIndex();
-  }, [selectedLocation, lbScrollTo]);
+    //scrollToUserIndex();
+  }, [selectedLocation, lbScrollTo, prop.activateFormTouch]);
 
   const leaderboardGradesText = (grades) => {
     let newString = "";
