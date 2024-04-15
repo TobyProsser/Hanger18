@@ -149,7 +149,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       console.log("Distance:", minDistance, "meters");
 
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
-      if (minDistance < 0.25) {
+      if (minDistance > 0.25) {
         Alert.alert(
           "No gym Found",
           `You are not close enough to a registered gym to submit climb. You are ${minDistance.toPrecision(

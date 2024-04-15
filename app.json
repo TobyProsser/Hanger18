@@ -2,7 +2,7 @@
   "expo": {
     "name": "ClimberLB",
     "slug": "Hanger18",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
       "**/*"
     ],
     "ios": {
-      "buildNumber": "6",
+      "buildNumber": "7",
       "infoPlist": {
       "NSPhotoLibraryUsageDescription": "We need access to your photo library to select the profile image.",
       "NSCameraUsageDescription": "We need access to your camera to take photos of the climbs.",
@@ -27,7 +27,7 @@
       "bundleIdentifier": "com.fathomcreative.hanger18"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "permissions": ["Allow app to ensure you are at a climbing gym when submitting a climb."],
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
