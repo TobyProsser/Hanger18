@@ -2,7 +2,7 @@
   "expo": {
     "name": "ClimberLB",
     "slug": "Hanger18",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
       "**/*"
     ],
     "ios": {
-      "buildNumber": "7",
+      "buildNumber": "8",
       "infoPlist": {
       "NSPhotoLibraryUsageDescription": "We need access to your photo library to select the profile image.",
       "NSCameraUsageDescription": "We need access to your camera to take photos of the climbs.",
