@@ -73,10 +73,11 @@ interface ITallClimbHolderProps {
 }
 
 const TallClimbHolder = (prop: ITallClimbHolderProps) => {
-  const [grade1, setGrade1] = useState(-1);
+  const [grade1, setGrade1] = useState(prop.grade ? prop.grade : -1);
   const [color1, setColor1] = useState(prop.color ? prop.color : "null");
   const isGradeExpanded = useSharedValue(false);
   const isColorExpanded = useSharedValue(false);
+  const image = useSharedValue("null");
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
   const [locationPermission, setLocationPermission] = useState(null);
@@ -89,10 +90,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const { selectedLocation, setSelectedLocation, setLBScrollTo } =
     useLocationContext();
-
-  useEffect(() => {
-    console.log("loading: " + loading);
-  }, [loading]);
 
   function deg2rad(deg) {
     return deg * (Math.PI / 180);
@@ -119,7 +116,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     return distance;
   };
 
-  const findClimbingGym = async () => {
+  const findClimbingGym = async (climbID: string, image: string) => {
     const location = await Location.getCurrentPositionAsync({});
     console.log("User location:", location.coords);
     if (location) {
@@ -144,12 +141,27 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         }
       }
 
-      console.log(userLatitude + ", " + userLongitude);
-      console.log("Closest business:", closestBusiness.name);
-      console.log("Distance:", minDistance, "meters");
+      // console.log(userLatitude + ", " + userLongitude);
+      // console.log("Closest business:", closestBusiness.name);
+      // console.log("Distance:", minDistance, "meters");
 
+      setLoading(false);
+      console.log("returning closest business name: " + closestBusiness.name);
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
-      if (minDistance > 0.25) {
+      if (minDistance < 0.25) {
+        //If too far, delete session
+        if (climbID) {
+          const currentUser = auth().currentUser;
+          if (currentUser) {
+            const ref = await db().ref(
+              `/users/${currentUser}/${selectedLocation}/sessions/${climbID}`
+            );
+
+            ref.remove();
+            console.log("Too far from gym, climb deleted. prop id: " + climbID);
+          }
+        }
+
         Alert.alert(
           "No gym Found",
           `You are not close enough to a registered gym to submit climb. You are ${minDistance.toPrecision(
@@ -168,19 +180,53 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
           ]
         );
         return "null";
+      } else if (selectedLocation != closestBusiness.name) {
+        //else if selected location is different from tracked location, move session.
+        if (prop.sessionId) {
+          const currentUser = auth().currentUser;
+          if (currentUser) {
+            try {
+              db()
+                .ref(
+                  `/users/${currentUser.uid}/${selectedLocation}/sessions/${climbID}`
+                )
+                .remove();
+              console.log(
+                "Climb was submitted at wrong location and was resaved. Last sessionID: " +
+                  climbID +
+                  " climb was resaved using image: " +
+                  image
+              );
+              setSelectedLocation(closestBusiness.name);
+              submitClimb(
+                prop.grade,
+                prop.color,
+                image,
+                closestBusiness.name,
+                true
+              );
+            } catch (error) {
+              console.error("Error fetching last session:", error);
+            }
+          }
+        }
       }
 
+      console.log("returning closest business name: " + closestBusiness.name);
       return closestBusiness.name;
     } else {
       return "No-Business-Found";
     }
   };
 
-  const requestPermissions = async () => {
+  const requestPermissions = async (replacing: boolean) => {
+    let perm1 = false;
+    let perm2 = false;
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       console.log("status camera", status);
       setCameraPermission(status === "granted");
+      perm1 = status === "granted";
     } catch (error) {
       console.log("error", error);
     }
@@ -190,9 +236,14 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       if (status == "granted") {
         console.log("status location", status);
         setLocationPermission(status === "granted");
+        perm2 = status === "granted";
       }
     } catch (error) {
       console.log("error", error);
+    }
+
+    if (perm1 && perm2) {
+      takeImage(replacing);
     }
   };
 
@@ -315,11 +366,19 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     grade: number,
     color: string,
     imageUri: string,
-    gym: string
+    gym: string,
+    locationFound: boolean
   ) => {
     const currentUser = auth().currentUser;
     if (currentUser) {
-      await saveClimb(gym, grade, color, imageUri, currentUser.uid);
+      await saveClimb(
+        gym,
+        grade,
+        color,
+        imageUri,
+        currentUser.uid,
+        locationFound
+      );
     }
   };
 
@@ -364,10 +423,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   };
 
   const takeImage = async (replacing: boolean) => {
-    if (!cameraPermission) {
-      requestPermissions();
-    }
-
     if (replacing) {
       deleteLastSession();
     }
@@ -381,34 +436,28 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       if (!response.canceled) {
         setLoading(true);
 
-        const gym = await findClimbingGym();
-        if (gym != "null") {
-          const uri = response.assets[0].uri;
+        const uri = response.assets[0].uri;
 
-          // Compress the image
-          const compressedImage = await ImageManipulator.manipulateAsync(
-            uri,
-            [{ resize: { height: 800 } }], // Resize if needed
-            { compress: 0.8 } // Adjust compression quality
-          );
+        // Compress the image
+        const compressedImage = await ImageManipulator.manipulateAsync(
+          uri,
+          [{ resize: { height: 800 } }], // Resize if needed
+          { compress: 0.8 } // Adjust compression quality
+        );
 
-          const imageUrl = await UploadToStorageReturnUrl(compressedImage.uri);
-          prop.setImageUri(imageUrl);
-          climbingGym.value = gym;
-          setSelectedLocation(gym);
-          console.log("awaited for: " + gym);
+        const imageUrl = await UploadToStorageReturnUrl(compressedImage.uri);
+        prop.setImageUri(imageUrl);
+        console.log("Image prop saved as: " + imageUrl);
+        climbingGym.value = selectedLocation;
 
-          submitClimb(-1, "null", imageUrl, gym);
-        } else {
-          setLoading(false);
-        }
+        submitClimb(-1, "null", imageUrl, selectedLocation, false);
       }
     });
   };
 
   const pickImage = async () => {
     if (!galleryPermission) {
-      requestPermissions();
+      requestPermissions(false);
     }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -420,7 +469,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     if (!result.canceled) {
       prop.setImageUri(result.assets[0].uri);
 
-      submitClimb(-1, "null", result.assets[0].uri, selectedLocation);
+      submitClimb(-1, "null", result.assets[0].uri, selectedLocation, false);
     }
   };
 
@@ -448,21 +497,33 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     grade: number,
     color: string,
     imageUri: string,
-    currentUser: string
+    currentUser: string,
+    locationFound: boolean
   ) => {
     const date = Date.now();
-    prop.setCurSessionId(date + currentUser);
-    console.log("saving climb at climbing gym: " + gym);
-    await db()
-      .ref(`/users/${currentUser}/${gym}/sessions/${date + currentUser}`)
-      .set({
-        grade,
-        color,
-        imageUri,
-        key: date + currentUser,
-        date: date,
-        climbingGym: gym,
-      });
+    const newID = date + currentUser;
+    await prop.setCurSessionId(newID);
+    await prop.setImageUri(imageUri);
+
+    if (!locationFound) {
+      findClimbingGym(newID, imageUri);
+    }
+    console.log(
+      "saving climb at climbing gym: " +
+        gym +
+        " and setting prop session id " +
+        newID +
+        " and image: " +
+        imageUri
+    );
+    await db().ref(`/users/${currentUser}/${gym}/sessions/${newID}`).set({
+      grade,
+      color,
+      imageUri,
+      key: newID,
+      date: date,
+      climbingGym: gym,
+    });
 
     setLoading(false);
   };
@@ -546,7 +607,16 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
               console.log("Npo Pressed");
             },
           },
-          { text: "Yes", onPress: () => takeImage(true) },
+          {
+            text: "Yes",
+            onPress: () => {
+              if (!cameraPermission) {
+                requestPermissions(true);
+              } else {
+                takeImage(true);
+              }
+            },
+          },
         ]
       );
     }
@@ -579,7 +649,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
           prop.isUsersClimbs ? (
             <View
               onTouchEnd={() => {
-                takeImage(false);
+                if (!cameraPermission) {
+                  requestPermissions(false);
+                } else {
+                  takeImage(false);
+                }
               }}
               style={styles.emptyImageContainer}
             >

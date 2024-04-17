@@ -5,6 +5,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { isJsxOpeningLikeElement } from "typescript";
 
 export const LoadingScreen = () => {
   const nav = useNavigation<NativeStackNavigationProp<any>>();

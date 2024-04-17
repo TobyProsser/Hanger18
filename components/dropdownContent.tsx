@@ -52,8 +52,6 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
       values.sort((a, b) => b.date - a.date);
       setFeed([...values]);
       setLimit(10);
-
-      console.log("Climbs Length: " + values.length);
     }
   };
   //scroll to start
@@ -61,7 +59,13 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
     }
+    console.log(
+      "prop session id has changed (from use effect in parent) " + curSessionId
+    );
   }, [curSessionId]);
+  React.useEffect(() => {
+    console.log("imageUri has changed (from use effect in parent) " + imageUri);
+  }, [imageUri]);
   //Scroll Content
   React.useEffect(() => {
     if (sessionScrollTo == 10) {

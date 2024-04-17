@@ -91,15 +91,12 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         .limitToLast(loadedItems)
         .once("value");
 
-      console.log("snapshot: " + snapshot.numChildren());
       snapshot.forEach((childSnapshot) => {
         const value = childSnapshot.val();
 
         if (value) {
           values.push(value);
-          console.log("pushed value: " + value.name);
         } else {
-          console.log("pushed value: null");
           return null;
         }
       });
