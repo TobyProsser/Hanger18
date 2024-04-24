@@ -1,11 +1,12 @@
 import { View, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
 import Color from "color";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 
 type DropListItemColorType = {
   label: string;
@@ -14,7 +15,8 @@ type DropListItemColorType = {
 type DropListItemColorProps = DropListItemColorType & {
   index: number;
   dropdownItemsCount: number;
-  isExpanded: Animated.SharedValue<boolean>;
+  isExpanded: boolean;
+  setIsExpanded: Dispatch<SetStateAction<boolean>>;
   color: Dispatch<SetStateAction<string>>;
   getColor: string;
   secondRow: boolean;
@@ -25,6 +27,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   index,
   dropdownItemsCount,
   isExpanded,
+  setIsExpanded,
   color,
   getColor,
   secondRow,
@@ -40,6 +43,7 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   const expandedScale = 1;
   const collapsedScale = 1;
 
+  const expand = useSharedValue(false);
   const expandedBackgroundColor = "#1B1B1B";
   const colapsedBackgroundColor = Color(expandedBackgroundColor)
     .lighten(index * 0.25)
@@ -80,17 +84,21 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
         return "brown";
     }
   };
+  useEffect(() => {
+    expand.value = isExpanded;
+  }, [isExpanded]);
+
   const rStyle = useAnimatedStyle<AnimatedStyle>(() => {
     return {
       backgroundColor: withTiming(
-        isExpanded.value ? expandedBackgroundColor : colapsedBackgroundColor
+        expand.value ? expandedBackgroundColor : colapsedBackgroundColor
       ),
-      top: withSpring(isExpanded.value ? expandedTop : collapsedTop, {
+      top: withSpring(expand.value ? expandedTop : collapsedTop, {
         damping: 13,
       }),
       transform: [
         {
-          scale: withSpring(isExpanded.value ? expandedScale : collapsedScale),
+          scale: withSpring(expand.value ? expandedScale : collapsedScale),
         },
       ],
     };
@@ -99,54 +107,54 @@ const ColorDropListItem: React.FC<DropListItemColorProps> = ({
   const isHeader = index === 0;
 
   return (
-    <Animated.View
-      onTouchEnd={() => {
-        //If the color has been set, dont allow the user to click on the color drop down
-        if (!submitted) {
-          if (!isHeader) {
-            secondRow
-              ? color(returnColorString(index + 6))
-              : color(returnColorString(index));
-          } else {
-            if (secondRow) {
-              color(returnColorString(index + 6));
+    <View>
+      <Animated.View
+        onTouchEnd={() => {
+          //If the color has been set, dont allow the user to click on the color drop down
+          if (!submitted) {
+            if (!isHeader) {
+              secondRow
+                ? color(returnColorString(index + 6))
+                : color(returnColorString(index));
+            } else {
+              if (secondRow) {
+                color(returnColorString(index + 6));
+              }
             }
+            setIsExpanded(!isExpanded);
           }
-
-          isExpanded.value = !isExpanded.value;
-        }
-      }}
-      style={[
-        styles.animatedView,
-        {
-          zIndex: dropdownItemsCount - index,
-
-          width: DropListItemWidth,
-          height: DropListItemHeight,
-          shadowColor: "#FFFFFF", // White shadow color
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.25,
-          shadowRadius: 6,
-        },
-        rStyle,
-      ]}
-    >
-      <View style={styles.innerOval}>
-        <Animated.View
-          style={[
-            styles.innerAnimatedView,
-            {
-              backgroundColor:
-                index == 0 && !secondRow
-                  ? getColor
-                  : secondRow
-                  ? returnColorString(index + 6)
-                  : returnColorString(index),
-            },
-          ]}
-        />
-      </View>
-    </Animated.View>
+        }}
+        style={[
+          styles.animatedView,
+          {
+            zIndex: dropdownItemsCount - index,
+            width: DropListItemWidth,
+            height: DropListItemHeight,
+            shadowColor: "#FFFFFF", // White shadow color
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 6,
+          },
+          rStyle,
+        ]}
+      >
+        <View style={styles.innerOval}>
+          <Animated.View
+            style={[
+              styles.innerAnimatedView,
+              {
+                backgroundColor:
+                  (index == 0 || index == 5) && !secondRow
+                    ? getColor
+                    : secondRow
+                    ? returnColorString(index + 6)
+                    : returnColorString(index),
+              },
+            ]}
+          />
+        </View>
+      </Animated.View>
+    </View>
   );
 };
 

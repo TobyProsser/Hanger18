@@ -6,7 +6,8 @@ import Animated from "react-native-reanimated";
 type DropListItemColorProps = {
   header: DropListItemColorType;
   options: DropListItemColorType[];
-  isExpanded: Animated.SharedValue<boolean>;
+  isExpanded: boolean;
+  setIsExpanded: Dispatch<SetStateAction<boolean>>;
   color: Dispatch<SetStateAction<string>>;
   getColor: string;
   secondRow: boolean;
@@ -17,6 +18,7 @@ const ColorDropdown: React.FC<DropListItemColorProps> = ({
   header,
   options,
   isExpanded,
+  setIsExpanded,
   color,
   getColor,
   secondRow,
@@ -37,6 +39,7 @@ const ColorDropdown: React.FC<DropListItemColorProps> = ({
             index={index}
             {...item}
             isExpanded={isExpanded}
+            setIsExpanded={setIsExpanded}
             color={color}
             dropdownItemsCount={dropdownItems.length}
             getColor={getColor}

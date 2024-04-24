@@ -72,7 +72,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   React.useEffect(() => {
     if (sessionScrollTo == 10) {
       addButtonScroll();
-      setSessionScrollTo(sessionScrollTo);
+      setSessionScrollTo(0);
     }
   }, [sessionScrollTo]);
 

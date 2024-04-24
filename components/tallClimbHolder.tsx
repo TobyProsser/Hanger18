@@ -76,7 +76,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [grade1, setGrade1] = useState(prop.grade ? prop.grade : -1);
   const [color1, setColor1] = useState(prop.color ? prop.color : "null");
   const isGradeExpanded = useSharedValue(false);
-  const isColorExpanded = useSharedValue(false);
+  const [isColorExpanded, setIsColorExpanded] = useState(false);
+  const colorExpand = useSharedValue(false);
   const image = useSharedValue("null");
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
@@ -87,6 +88,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [header, setHeader] = useState({ label: "V#" });
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
+
+  useEffect(() => {
+    console.log("chabnged :" + isColorExpanded);
+    colorExpand.value = isColorExpanded;
+  }, [isColorExpanded]);
 
   const {
     selectedLocation,
@@ -595,7 +601,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const rStyle1 = useAnimatedStyle(() => {
     return {
-      opacity: withTiming(isColorExpanded.value ? 1 : 0),
+      opacity: withTiming(colorExpand.value ? 1 : 0),
     };
   }, []);
 
@@ -737,7 +743,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
             <View
               style={{
                 flex: 1,
-                backgroundColor: "orange",
                 position: "absolute",
               }}
             >
@@ -771,11 +776,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                   gap: -210,
                 }}
               >
-                <View style={styles.colorContainer}>
+                <View style={[styles.colorContainer]}>
                   <ColorDropdown
                     header={header1}
                     options={options1}
                     isExpanded={isColorExpanded}
+                    setIsExpanded={setIsColorExpanded}
                     color={setColor1}
                     getColor={color1}
                     secondRow={false}
@@ -783,12 +789,17 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                   />
                 </View>
                 <Animated.View
-                  style={[styles.colorContainer, { top: 50 + 2 }, rStyle1]}
+                  style={[
+                    styles.colorContainer,
+                    { top: isColorExpanded ? 50 + 2 : -400 },
+                    rStyle1,
+                  ]}
                 >
                   <ColorDropdown
                     header={header1}
                     options={options2}
                     isExpanded={isColorExpanded}
+                    setIsExpanded={setIsColorExpanded}
                     color={setColor1}
                     getColor={color1}
                     secondRow={true}

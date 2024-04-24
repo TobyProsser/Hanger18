@@ -269,7 +269,7 @@ const Profile = (prop: IProfileProps) => {
         <View style={styles.line}></View>
         <View style={styles.rowStyle}>
           <Text style={styles.numbersText}>#{lbIndex + 1}</Text>
-          <Text style={styles.numbersText}>{climbsAmount}/10</Text>
+          <Text style={styles.numbersText}>{climbsAmount}/5</Text>
         </View>
         <Image
           style={{
