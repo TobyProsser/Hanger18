@@ -35,7 +35,7 @@ const profileImage =
 
 const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   const [feed, setFeed] = useState<FeedClimb[]>([]);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
   const [imageUri, setImageUri] = useState("null");
   const [curSessionId, setCurSessionId] = useState(Date.now());
   const [isUsersClimbs, setIsUsersClimbs] = useState(false);
@@ -49,20 +49,22 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
       const values: FeedClimb[] = Array.isArray(snapshot.val())
         ? snapshot.val()
         : Object.values(snapshot.val());
-      values.sort((a, b) => b.date - a.date);
+      values.sort((a, b) => b.grade - a.grade);
       setFeed([...values]);
-      setLimit(10);
+      setLimit(5);
     }
   };
   //scroll to start
   React.useEffect(() => {
     if (flatListRef.current) {
-      flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+      //flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+      addButtonScroll();
     }
     console.log(
       "prop session id has changed (from use effect in parent) " + curSessionId
     );
   }, [curSessionId]);
+
   React.useEffect(() => {
     console.log("imageUri has changed (from use effect in parent) " + imageUri);
   }, [imageUri]);
@@ -70,7 +72,7 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   React.useEffect(() => {
     if (sessionScrollTo == 10) {
       addButtonScroll();
-      setSessionScrollTo(0);
+      setSessionScrollTo(sessionScrollTo);
     }
   }, [sessionScrollTo]);
 

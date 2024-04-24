@@ -88,8 +88,12 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
   const [climbSubmitted, setClimbSubmitted] = useState(false);
 
-  const { selectedLocation, setSelectedLocation, setLBScrollTo } =
-    useLocationContext();
+  const {
+    selectedLocation,
+    setSelectedLocation,
+    setLBScrollTo,
+    setSessionScrollTo,
+  } = useLocationContext();
 
   function deg2rad(deg) {
     return deg * (Math.PI / 180);
@@ -148,7 +152,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       setLoading(false);
       console.log("returning closest business name: " + closestBusiness.name);
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
-      if (minDistance > 0.25) {
+      if (minDistance < 0.25) {
         //If too far, delete session
         if (climbID) {
           const currentUser = auth().currentUser;
@@ -222,11 +226,16 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const requestPermissions = async (replacing: boolean) => {
     let perm1 = false;
     let perm2 = false;
+
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       console.log("status camera", status);
       setCameraPermission(status === "granted");
       perm1 = status === "granted";
+
+      if (status == "denied") {
+        Alert.alert("Go to settings to give access to the camera");
+      }
     } catch (error) {
       console.log("error", error);
     }
@@ -237,6 +246,10 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         console.log("status location", status);
         setLocationPermission(status === "granted");
         perm2 = status === "granted";
+      }
+
+      if (status == "denied") {
+        Alert.alert("Go to settings to give access to location permissions");
       }
     } catch (error) {
       console.log("error", error);
@@ -570,6 +583,8 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
         await updateLeaderboard(newGrade, allGrades, currentUser);
       })
       .catch((error) => console.error("Number could not be added: " + error));
+
+    setSessionScrollTo(0);
   };
 
   const rStyle = useAnimatedStyle(() => {
@@ -610,7 +625,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
           {
             text: "Yes",
             onPress: () => {
-              if (!cameraPermission) {
+              if (!cameraPermission || !locationPermission) {
                 requestPermissions(true);
               } else {
                 takeImage(true);
@@ -649,7 +664,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
           prop.isUsersClimbs ? (
             <View
               onTouchEnd={() => {
-                if (!cameraPermission) {
+                if (!cameraPermission || !locationPermission) {
                   requestPermissions(false);
                 } else {
                   takeImage(false);
