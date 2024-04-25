@@ -251,7 +251,7 @@ const Profile = (prop: IProfileProps) => {
           style={[styles.button, externalStyles.thirdColor]}
           onTouchEnd={() => {
             handleClick(false);
-            setSessionScrollTo(10);
+            setSessionScrollTo(-1);
           }}
         >
           <Text style={styles.text}>Add</Text>
@@ -269,7 +269,9 @@ const Profile = (prop: IProfileProps) => {
         <View style={styles.line}></View>
         <View style={styles.rowStyle}>
           <Text style={styles.numbersText}>#{lbIndex + 1}</Text>
-          <Text style={styles.numbersText}>{climbsAmount}/5</Text>
+          <Text style={styles.numbersText}>
+            {climbsAmount > 5 ? 5 : climbsAmount}/5
+          </Text>
         </View>
         <Image
           style={{

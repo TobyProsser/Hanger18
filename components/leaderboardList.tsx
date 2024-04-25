@@ -157,12 +157,10 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
         refPath = `/leaderboards/${businessLocations[0].name}/leaderboard`;
       }
     }
-    console.log("refPath: " + refPath);
     return refPath;
   };
 
   useEffect(() => {
-    console.log("getting data and scrolling to: " + lbScrollTo);
     retrieveData(getRefPath());
     //scrollToUserIndex();
   }, [selectedLocation, lbScrollTo, prop.activateFormTouch]);
@@ -232,7 +230,6 @@ const LeaderboardList = (prop: ILeaderbaordProps) => {
                   <TouchableOpacity
                     onPress={() => {
                       if (!isScrolling) {
-                        console.log("current User: " + item.currentUser);
                         prop.onPress(item.currentUser);
                       }
                     }}

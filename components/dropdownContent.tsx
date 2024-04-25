@@ -57,21 +57,22 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   //scroll to start
   React.useEffect(() => {
     if (flatListRef.current) {
-      //flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
-      addButtonScroll();
+      if (sessionScrollTo == -1) {
+        addButtonScroll();
+      } else {
+        flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
+      }
     }
     console.log(
       "prop session id has changed (from use effect in parent) " + curSessionId
     );
   }, [curSessionId]);
 
-  React.useEffect(() => {
-    console.log("imageUri has changed (from use effect in parent) " + imageUri);
-  }, [imageUri]);
   //Scroll Content
   React.useEffect(() => {
+    console.log("Session Scrool To: " + sessionScrollTo);
     if (sessionScrollTo == 10) {
-      addButtonScroll();
+      flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
       setSessionScrollTo(0);
     }
   }, [sessionScrollTo]);
@@ -119,7 +120,6 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
   useEffect(() => {
     if (currentUser && !currentUser.includes("[")) {
       try {
-        console.log("SElected location: " + selectedLocation);
         const refPath = `/users/${currentUser}/${selectedLocation}/sessions`;
         db()
           .ref(refPath)
@@ -160,7 +160,6 @@ const DropdownContenet: React.FC<DropdownContentProps> = ({ currentUser }) => {
 
         const newValue = image.profileImage;
         setProfileImageUri(newValue);
-        console.log(image.profileImage);
       })
       .catch((error) => console.error("Number could not be added: " + error));
   };

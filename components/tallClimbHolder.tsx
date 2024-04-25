@@ -73,7 +73,7 @@ interface ITallClimbHolderProps {
 }
 
 const TallClimbHolder = (prop: ITallClimbHolderProps) => {
-  const [grade1, setGrade1] = useState(prop.grade ? prop.grade : -1);
+  const [grade1, setGrade1] = useState(prop.grade ? prop.grade : -2);
   const [color1, setColor1] = useState(prop.color ? prop.color : "null");
   const isGradeExpanded = useSharedValue(false);
   const [isColorExpanded, setIsColorExpanded] = useState(false);
@@ -90,7 +90,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
   const [climbSubmitted, setClimbSubmitted] = useState(false);
 
   useEffect(() => {
-    console.log("chabnged :" + isColorExpanded);
     colorExpand.value = isColorExpanded;
   }, [isColorExpanded]);
 
@@ -122,13 +121,11 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const distance = R * c; // Distance in kilometers
-    console.log("distance: " + distance);
     return distance;
   };
 
   const findClimbingGym = async (climbID: string, image: string) => {
     const location = await Location.getCurrentPositionAsync({});
-    console.log("User location:", location.coords);
     if (location) {
       // Find the closest business location
       let closestBusiness = null;
@@ -156,7 +153,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       // console.log("Distance:", minDistance, "meters");
 
       setLoading(false);
-      console.log("returning closest business name: " + closestBusiness.name);
+      //console.log("returning closest business name: " + closestBusiness.name);
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
       if (minDistance < 0.25) {
         //If too far, delete session
@@ -292,7 +289,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       .update({ lbIndex: leaderboardIndex });
 
     setLBScrollTo(leaderboardIndex);
-    console.log("SCROLLING TO " + leaderboardIndex + "On Leaderboard called");
+    //console.log("SCROLLING TO " + leaderboardIndex + "On Leaderboard called");
   };
 
   const findLeaderboardIndex = async (userName: string) => {
@@ -432,7 +429,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
       // Get the download URL for the uploaded image
       const downloadURL = await snapshot.ref.getDownloadURL();
-      console.log("Image download URL:", downloadURL);
 
       return downloadURL;
     } catch (error) {
@@ -466,7 +462,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
 
         const imageUrl = await UploadToStorageReturnUrl(compressedImage.uri);
         prop.setImageUri(imageUrl);
-        console.log("Image prop saved as: " + imageUrl);
         climbingGym.value = selectedLocation;
 
         submitClimb(-1, "null", imageUrl, selectedLocation, false);
@@ -527,14 +522,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     if (!locationFound) {
       findClimbingGym(newID, imageUri);
     }
-    console.log(
-      "saving climb at climbing gym: " +
-        gym +
-        " and setting prop session id " +
-        newID +
-        " and image: " +
-        imageUri
-    );
     await db().ref(`/users/${currentUser}/${gym}/sessions/${newID}`).set({
       grade,
       color,
@@ -547,6 +534,45 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     setLoading(false);
   };
 
+  const constructGradeList = async (currentUser: string) => {
+    const sessionsRef = db().ref(
+      `/users/${currentUser}/${selectedLocation}/sessions/`
+    );
+    console.log("path: " + sessionsRef);
+    const gradeList = []; // Initialize an empty array to store grade values
+
+    // Use a Promise to await the data retrieval
+    return new Promise<string>((resolve, reject) => {
+      sessionsRef.once(
+        "value",
+        (snapshot) => {
+          console.log("sessions: " + snapshot.numChildren());
+          snapshot.forEach((sessionSnapshot) => {
+            const grade = sessionSnapshot.val().grade; // Get the grade value
+            console.log("Grade: " + grade);
+            if (typeof grade === "number") {
+              gradeList.push(grade); // Add the grade to the list if it's a number
+            } else {
+              return null;
+            }
+          });
+
+          gradeList.sort((a, b) => b - a);
+
+          // Create the string in the format "V# V# V#"
+          const formattedString = gradeList
+            .map((grade) => `V${grade}`)
+            .join(" ");
+          console.log("Formatted String:", formattedString);
+          resolve(formattedString); // Resolve the promise with the formatted string
+        },
+        (error) => {
+          reject(error); // Reject the promise if there's an error
+        }
+      );
+    });
+  };
+
   const updateClimb = async (
     newGrade: number,
     newColor: string,
@@ -554,9 +580,6 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     currentUser: string
   ) => {
     setClimbSubmitted(true);
-
-    console.log("locationContextValue: " + selectedLocation);
-    console.log("updating session with location: " + climbingGym.value);
 
     await db()
       .ref(
@@ -572,25 +595,23 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
     const allGradesPath = `/users/${currentUser}/${selectedLocation}`;
     const allGradesSnapshot = await db().ref(allGradesPath).once("value");
     let allGrades = allGradesSnapshot.val().allGrades as string;
-    //Update allGrades
-    await db()
-      .ref(allGradesPath)
-      .once("value")
-      .then((snapshot) => {
-        let numbers = snapshot.val();
 
-        // Add the new number to the end of the string
-        const newValue = allGrades + "V" + newGrade + " ";
-        allGrades = newValue;
+    await constructGradeList(currentUser)
+      .then((result) => {
+        console.log("Result:", result); // Use the formatted string as needed
+        allGrades = result;
+
         // Update the list in Firebase
-        return db().ref(allGradesPath).update({ allGrades: newValue });
+        return db().ref(allGradesPath).update({ allGrades: result });
       })
-      .then(async () => {
-        await updateLeaderboard(newGrade, allGrades, currentUser);
-      })
-      .catch((error) => console.error("Number could not be added: " + error));
+      .catch((error) => {
+        console.error("Error:", error);
+      });
 
-    setSessionScrollTo(0);
+    setSessionScrollTo(10);
+    console.log("Updating leaderboard");
+
+    await updateLeaderboard(newGrade, allGrades, currentUser);
   };
 
   const rStyle = useAnimatedStyle(() => {
@@ -817,7 +838,10 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
                 top: 220,
               }}
             >
-              {color1 != "null" && grade1 != -1 && !climbSubmitted ? (
+              {color1 != "null" &&
+              grade1 != -1 &&
+              !climbSubmitted &&
+              !isColorExpanded ? (
                 <View
                   onTouchEnd={() => {
                     const currentUser = auth().currentUser;
