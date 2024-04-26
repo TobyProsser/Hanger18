@@ -155,7 +155,7 @@ const TallClimbHolder = (prop: ITallClimbHolderProps) => {
       setLoading(false);
       //console.log("returning closest business name: " + closestBusiness.name);
       //DISTANCE YOU ARE ALLOWED TO BE FROM THE GYM
-      if (minDistance < 0.25) {
+      if (minDistance > 0.25) {
         //If too far, delete session
         if (climbID) {
           const currentUser = auth().currentUser;
