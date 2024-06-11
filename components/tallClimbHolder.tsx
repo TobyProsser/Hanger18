@@ -25,7 +25,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
-import { LeaderboardEntry } from "./types/leaderboardentry";
+import { LeaderboardEntry } from "./objects/leaderboardentry";
 import { useLocationContext } from "./context/locationcontext";
 import * as ImageManipulator from "expo-image-manipulator";
 const CARD_HOLDER_HEIGHT = 350;

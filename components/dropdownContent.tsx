@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import TallClimbHolder from "./tallClimbHolder";
 import { FirebaseDatabaseTypes } from "@react-native-firebase/database";
-import { FeedClimb } from "./types/feedclimb";
+import { FeedClimb } from "./objects/feedclimb";
 import db from "@react-native-firebase/database";
 import auth from "@react-native-firebase/auth";
 import * as ImagePicker from "expo-image-picker";

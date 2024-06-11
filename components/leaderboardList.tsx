@@ -4,7 +4,7 @@ import { Dimensions, FlatList, TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View, Image, Animated } from "react-native";
 
 import db from "@react-native-firebase/database";
-import { FeedClimb } from "./types/feedclimb";
+import { FeedClimb } from "./objects/feedclimb";
 import PlacerColorItem from "./elements/placercoloritem";
 import { useLocationContext } from "./context/locationcontext";
 //import LocationContext from "./context/locationcontext";
